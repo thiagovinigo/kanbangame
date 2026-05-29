@@ -78,10 +78,10 @@ export const RulesModal = ({ isOpen, onClose }) => {
           <h3 style={{ marginTop: '12px', marginBottom: '8px', color: 'var(--accent-purple)' }}>Como Jogar</h3>
           <ol style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <li><strong>Puxe o Trabalho:</strong> Mova os cartões do <em>Backlog</em> para as colunas de execução conforme houver espaço.</li>
-            <li><strong>Role os Dados:</strong> A cada dia (turno), clique em "Rolar Dados" para simular a capacidade da equipe. Os pontos azuis são <strong>Dev</strong>, roxos são <strong>QA</strong> e verdes são <strong>UAT</strong>.</li>
-            <li><strong>Aplique o Esforço:</strong> Nos cartões que estão nas colunas de <em>Fazendo</em>, clique no botão <strong>"+"</strong> para consumir os pontos rolados e reduzir o esforço necessário do cartão.</li>
-            <li><strong>Avance o Dia:</strong> Quando não tiver mais capacidade disponível ou pontos para gastar, clique em "Próximo Dia" para prosseguir para o próximo turno.</li>
-            <li><strong>Métricas:</strong> Observe o gráfico de "Lead Time" para ver quanto tempo os cartões levam para ser entregues, e o "Cumulative Flow" para observar os gargalos ao longo dos dias.</li>
+            <li><strong>Capacidade da Equipe:</strong> A equipe é formada por Avatares (Devs, QA e PO). A cada novo dia, a energia deles é recarregada para 8 horas diárias de trabalho por pessoa.</li>
+            <li><strong>Aplique o Esforço:</strong> Nos cartões que estão nas colunas de <em>Fazendo</em>, clique nos botões <strong>+8h</strong> (alocar um dia inteiro) ou <strong>+1h</strong> (alocar frações) para consumir as horas da equipe e finalizar a tarefa.</li>
+            <li><strong>Avance o Dia:</strong> Quando não tiver mais capacidade disponível ou horas para gastar, clique em "Próximo Dia" para a equipe dormir, acordar com as energias recarregadas e iniciar o próximo turno.</li>
+            <li><strong>Métricas:</strong> Observe o gráfico de "Tempo de Entrega" para ver quanto tempo os cartões levam para ser entregues, e o "Fluxo Cumulativo" para observar os gargalos ao longo dos dias.</li>
           </ol>
         </div>
       </div>

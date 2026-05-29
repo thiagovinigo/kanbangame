@@ -9,15 +9,9 @@ export const GameProvider = ({ children }) => {
   const [columns, setColumns] = useState(initialColumns);
   const [cards, setCards] = useState(initialCards);
   const [turn, setTurn] = useState(1);
-  const [diceRoll, setDiceRoll] = useState({ dev: 0, test: 0, uat: 0 });
+  const TEAM_CAPACITY = { dev: 16, test: 8, uat: 8 };
+  const [capacity, setCapacity] = useState(TEAM_CAPACITY);
   const [history, setHistory] = useState([]); // For CFD metrics
-
-  // Auto-roll dice on first render if turn === 1 and all dice are 0
-  useEffect(() => {
-    if (turn === 1 && diceRoll.dev === 0 && diceRoll.test === 0 && diceRoll.uat === 0) {
-      rollDice();
-    }
-  }, []);
   
   // Track metrics each turn
   const nextTurn = () => {
@@ -42,24 +36,18 @@ export const GameProvider = ({ children }) => {
     }));
 
     setTurn(prev => prev + 1);
-    setDiceRoll({ dev: 0, test: 0, uat: 0 }); // Reset dice for the new day
+    setCapacity(TEAM_CAPACITY); // Recharge capacity for the new day
   };
 
   const resetGame = () => {
     setColumns(initialColumns);
     setCards(initialCards);
     setTurn(1);
-    setDiceRoll({ dev: 0, test: 0, uat: 0 });
+    setCapacity(TEAM_CAPACITY);
     setHistory([]);
   };
 
-  const rollDice = () => {
-    // Simulate team capacity for the day
-    const devCapacity = Math.floor(Math.random() * 6) + 1; // 1-6
-    const testCapacity = Math.floor(Math.random() * 4) + 1; // 1-4
-    const uatCapacity = Math.floor(Math.random() * 3) + 1; // 1-3
-    setDiceRoll({ dev: devCapacity, test: testCapacity, uat: uatCapacity });
-  };
+  // Removed rollDice function
 
   const moveCard = (cardId, toColumnId) => {
     const card = cards.find(c => c.id === cardId);
@@ -116,37 +104,34 @@ export const GameProvider = ({ children }) => {
     }));
   };
 
-  const applyEffort = (cardId, type) => {
-    // type is 'dev' or 'test'
-    if (diceRoll[type] <= 0) return; // No capacity left
-    
-    setCards(prev => prev.map(card => {
-      if (card.id === cardId && card.effortLeft[type] > 0) {
-        return {
-          ...card,
-          effortLeft: {
-            ...card.effortLeft,
-            [type]: card.effortLeft[type] - 1
-          }
-        };
-      }
-      return card;
-    }));
-    
-    setDiceRoll(prev => ({
-      ...prev,
-      [type]: prev[type] - 1
-    }));
+  const applyEffort = (cardId, effortType, amount = 1) => {
+    // Consume from capacity
+    if (capacity[effortType] < amount) {
+      alert('Capacidade insuficiente para este dia!');
+      return;
+    }
+    setCapacity(prev => ({ ...prev, [effortType]: prev[effortType] - amount }));
+
+    // Apply to card
+    setCards(prevCards => {
+      return prevCards.map(c => {
+        if (c.id === cardId) {
+          const newEffortLeft = { ...c.effortLeft };
+          newEffortLeft[effortType] = Math.max(0, newEffortLeft[effortType] - amount);
+          return { ...c, effortLeft: newEffortLeft };
+        }
+        return c;
+      });
+    });
   };
 
   const value = {
     columns,
     cards,
     turn,
-    diceRoll,
+    capacity,
     history,
     nextTurn,
-    rollDice,
     moveCard,
     applyEffort,
     resetGame

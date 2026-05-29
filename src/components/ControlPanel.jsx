@@ -1,11 +1,9 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
-import { Dices, FastForward, RotateCcw } from 'lucide-react';
+import { FastForward, RotateCcw, Users, UserCheck, UserCog } from 'lucide-react';
 
 export const ControlPanel = () => {
-  const { turn, diceRoll, rollDice, nextTurn, resetGame } = useGame();
-
-  const hasRolled = diceRoll.dev > 0 || diceRoll.test > 0 || diceRoll.uat > 0;
+  const { turn, capacity, nextTurn, resetGame } = useGame();
 
   return (
     <div className="glass-panel" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -18,17 +16,26 @@ export const ControlPanel = () => {
         <div style={{ width: '1px', height: '40px', background: 'var(--border-glass)' }}></div>
         
         <div style={{ display: 'flex', gap: '16px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(59, 130, 246, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--accent-blue)' }}>DEV CAPACITY</span>
-            <span style={{ fontSize: '1.25rem', fontWeight: 600 }}>{diceRoll.dev}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(59, 130, 246, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
+            <Users size={24} color="var(--accent-blue)" />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--accent-blue)' }}>DEV (2 PESSOAS)</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{capacity.dev}h disp.</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(139, 92, 246, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--accent-purple)' }}>QA CAP</span>
-            <span style={{ fontSize: '1.25rem', fontWeight: 600 }}>{diceRoll.test}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(139, 92, 246, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
+            <UserCheck size={24} color="var(--accent-purple)" />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--accent-purple)' }}>QA (1 PESSOA)</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{capacity.test}h disp.</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(16, 185, 129, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>UAT CAP</span>
-            <span style={{ fontSize: '1.25rem', fontWeight: 600 }}>{diceRoll.uat}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(16, 185, 129, 0.1)', padding: '8px 16px', borderRadius: '8px' }}>
+            <UserCog size={24} color="var(--accent-emerald)" />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--accent-emerald)' }}>PO/CLIENTE (1)</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{capacity.uat}h disp.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -43,16 +50,6 @@ export const ControlPanel = () => {
           Reiniciar
         </button>
 
-        <button 
-          className="btn btn-secondary"
-          onClick={rollDice}
-          disabled={hasRolled}
-          style={{ opacity: hasRolled ? 0.5 : 1, cursor: hasRolled ? 'not-allowed' : 'pointer' }}
-        >
-          <Dices size={18} />
-          Rolar Dados
-        </button>
-        
         <button className="btn btn-primary" onClick={nextTurn}>
           <FastForward size={18} />
           Próximo Dia
