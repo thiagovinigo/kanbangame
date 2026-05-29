@@ -5,7 +5,7 @@ import { ColumnCell } from './ColumnCell';
 import { Info } from 'lucide-react';
 
 export const Board = ({ onOpenPolicy }) => {
-  const { columns, moveCard } = useGame();
+  const { columns, moveCard, showFeedback } = useGame();
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -26,11 +26,11 @@ export const Board = ({ onOpenPolicy }) => {
       const card = active.data.current;
       // Force expedite cards to stay in expedite lane visually, though logically they just move column
       if (card.type === 'urgente' && !over.id.includes('-expedite')) {
-        alert("Cartões Urgentes devem ficar na raia de URGENTE!");
+        showFeedback('⚡ Classes de Serviço', 'Cartões "Urgente" devem tramitar exclusivamente na raia de URGENTE para furar fila com segurança!', 'warning');
         return;
       }
       if (card.type !== 'urgente' && over.id.includes('-expedite')) {
-        alert("Apenas cartões Urgentes podem entrar nesta raia!");
+        showFeedback('⚡ Classes de Serviço', 'Apenas cartões da classe de serviço "Urgente" podem entrar nesta raia expressa!', 'warning');
         return;
       }
 
@@ -38,16 +38,54 @@ export const Board = ({ onOpenPolicy }) => {
     }
   };
 
+  const upstreamCols = columns.filter(c => c.id === 'col-backlog' || c.id === 'col-selected');
+  const downstreamCols = columns.filter(c => c.id !== 'col-backlog' && c.id !== 'col-selected');
+
   return (
     <div className="board-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', overflowX: 'auto', paddingBottom: '20px' }}>
+      
+      {/* Zone Headers */}
+      <div style={{ display: 'flex', minWidth: 'max-content', paddingLeft: '162px', gap: '40px', marginBottom: '8px' }}>
+        <div style={{ width: `${upstreamCols.length * 262}px`, background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: '8px', padding: '8px', textAlign: 'center', color: 'var(--accent-purple)', fontWeight: 'bold', letterSpacing: '1px' }}>
+          UPSTREAM (Descoberta & Opções)
+        </div>
+        <div style={{ width: `${downstreamCols.length * 262}px`, background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', padding: '8px', textAlign: 'center', color: 'var(--accent-blue)', fontWeight: 'bold', letterSpacing: '1px' }}>
+          DOWNSTREAM (Entrega Contínua)
+        </div>
+      </div>
+
       <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragEnd={handleDragEnd}>
         
         {/* CSS Grid for the Board */}
-        <div style={{ display: 'grid', gridTemplateColumns: `150px repeat(${columns.length}, 250px)`, gap: '12px', minWidth: 'max-content' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `150px repeat(${upstreamCols.length}, 250px) 40px repeat(${downstreamCols.length}, 250px)`, gap: '12px', minWidth: 'max-content' }}>
           
           {/* Row 1: Headers & Policies */}
           <div style={{ padding: '12px' }}></div> {/* Empty top-left cell */}
-          {columns.map(col => (
+          
+          {upstreamCols.map(col => (
+            <div key={`header-${col.id}`} className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
+                <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>{col.title}</h3>
+                <button 
+                  onClick={() => onOpenPolicy(col)}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--accent-blue)', cursor: 'pointer', padding: 0, display: 'flex' }}
+                  title="Ver política explícita da coluna"
+                >
+                  <Info size={16} />
+                </button>
+              </div>
+              {col.limit > 0 && <span style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: '12px', marginBottom: '8px' }}>WIP: {col.limit}</span>}
+            </div>
+          ))}
+
+          {/* Commitment Point Header Divider */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: 'var(--accent-rose)', fontWeight: 'bold', fontSize: '0.75rem', letterSpacing: '1px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+               COMPROMETIMENTO
+            </div>
+          </div>
+
+          {downstreamCols.map(col => (
             <div key={`header-${col.id}`} className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
                 <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>{col.title}</h3>
@@ -67,7 +105,14 @@ export const Board = ({ onOpenPolicy }) => {
           <div className="glass-panel" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '4px solid var(--accent-rose)', background: 'rgba(244, 63, 94, 0.05)' }}>
             <h3 style={{ color: 'var(--accent-rose)', transform: 'rotate(-90deg)', whiteSpace: 'nowrap', margin: 0, fontSize: '1.2rem', letterSpacing: '2px' }}>URGENTE</h3>
           </div>
-          {columns.map(col => (
+          
+          {upstreamCols.map(col => (
+            <ColumnCell key={`exp-${col.id}`} column={col} swimlane="expedite" />
+          ))}
+
+          <div style={{ borderLeft: '3px dashed var(--accent-rose)', height: '100%', margin: '0 auto', opacity: 0.5 }}></div>
+
+          {downstreamCols.map(col => (
             <ColumnCell key={`exp-${col.id}`} column={col} swimlane="expedite" />
           ))}
 
@@ -75,7 +120,14 @@ export const Board = ({ onOpenPolicy }) => {
           <div className="glass-panel" style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRight: '4px solid var(--accent-blue)', background: 'rgba(59, 130, 246, 0.05)' }}>
             <h3 style={{ color: 'var(--accent-blue)', transform: 'rotate(-90deg)', whiteSpace: 'nowrap', margin: 0, fontSize: '1.2rem', letterSpacing: '2px' }}>PADRÃO</h3>
           </div>
-          {columns.map(col => (
+          
+          {upstreamCols.map(col => (
+            <ColumnCell key={`std-${col.id}`} column={col} swimlane="standard" />
+          ))}
+
+          <div style={{ borderLeft: '3px dashed var(--accent-rose)', height: '100%', margin: '0 auto', opacity: 0.5 }}></div>
+
+          {downstreamCols.map(col => (
             <ColumnCell key={`std-${col.id}`} column={col} swimlane="standard" />
           ))}
 

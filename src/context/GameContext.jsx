@@ -9,9 +9,24 @@ export const GameProvider = ({ children }) => {
   const [columns, setColumns] = useState(initialColumns);
   const [cards, setCards] = useState(initialCards);
   const [turn, setTurn] = useState(1);
-  const TEAM_CAPACITY = { dev: 16, test: 8, uat: 8 };
-  const [capacity, setCapacity] = useState(TEAM_CAPACITY);
+  const [teamConfig, setTeamConfig] = useState({ dev: 2, test: 1, uat: 1 });
+  const [capacity, setCapacity] = useState({ dev: 16, test: 8, uat: 8 });
   const [history, setHistory] = useState([]); // For CFD metrics
+  const [feedback, setFeedback] = useState(null);
+
+  const showFeedback = (title, message, type = 'error') => {
+    setFeedback({ title, message, type });
+  };
+  const closeFeedback = () => setFeedback(null);
+
+  const updateTeamConfig = (newConfig) => {
+    setTeamConfig(newConfig);
+    setCapacity({
+      dev: newConfig.dev * 8,
+      test: newConfig.test * 8,
+      uat: newConfig.uat * 8
+    });
+  };
   
   // Track metrics each turn
   const nextTurn = () => {
@@ -36,14 +51,22 @@ export const GameProvider = ({ children }) => {
     }));
 
     setTurn(prev => prev + 1);
-    setCapacity(TEAM_CAPACITY); // Recharge capacity for the new day
+    setCapacity({
+      dev: teamConfig.dev * 8,
+      test: teamConfig.test * 8,
+      uat: teamConfig.uat * 8
+    }); // Recharge capacity for the new day
   };
 
   const resetGame = () => {
     setColumns(initialColumns);
     setCards(initialCards);
     setTurn(1);
-    setCapacity(TEAM_CAPACITY);
+    setCapacity({
+      dev: teamConfig.dev * 8,
+      test: teamConfig.test * 8,
+      uat: teamConfig.uat * 8
+    });
     setHistory([]);
   };
 
@@ -54,7 +77,11 @@ export const GameProvider = ({ children }) => {
     if (!card || card.columnId === toColumnId) return;
 
     if (card.isBlocked) {
-      alert("Este cartão está bloqueado! Você precisa desbloqueá-lo antes de movê-lo.");
+      showFeedback(
+        '🛑 Cartão Impedido!', 
+        'Você não pode mover um cartão bloqueado. Pela regra do Kanban, ele deve continuar onde está e consumir o Limite de WIP para gerar "dor" no time. Façam um Swarming para resolver o impedimento antes de continuar!', 
+        'error'
+      );
       return;
     }
 
@@ -65,7 +92,11 @@ export const GameProvider = ({ children }) => {
     if (targetColumn.limit > 0 && card.type !== 'urgente') {
       const cardsInTarget = cards.filter(c => c.columnId === toColumnId).length;
       if (cardsInTarget >= targetColumn.limit) {
-        alert(`Não é possível mover. A coluna "${targetColumn.title}" atingiu seu limite (WIP Limit). Apenas cartões "Urgente" podem ignorar este limite.`);
+        showFeedback(
+          '⚠️ Pare de começar e comece a terminar!',
+          `Puxar este cartão violaria a capacidade máxima da coluna "${targetColumn.title}" (WIP Limit: ${targetColumn.limit}).\n\nNo Kanban, limitamos o Trabalho em Progresso para criar um Sistema Puxado. Ajude seus colegas a terminar o que já está na coluna em vez de puxar coisas novas!`,
+          'warning'
+        );
         return;
       }
     }
@@ -77,17 +108,17 @@ export const GameProvider = ({ children }) => {
     const uatDoneIndex = columns.findIndex(c => c.id === 'col-uat-done');
     
     if (colIndex >= devDoneIndex && card.effortLeft.dev > 0) {
-      alert("Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!");
+      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão para a próxima etapa!', 'error');
       return;
     }
 
     if (colIndex >= qaDoneIndex && card.effortLeft.test > 0) {
-      alert("Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!");
+      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão para a próxima etapa!', 'error');
       return;
     }
 
     if (colIndex >= uatDoneIndex && card.effortLeft.uat > 0) {
-      alert("Termine a validação com o Cliente (UAT) antes de avançar o cartão!");
+      showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão para a próxima etapa!', 'error');
       return;
     }
 
@@ -113,13 +144,13 @@ export const GameProvider = ({ children }) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
     if (card.isBlocked) {
-      alert("Cartão bloqueado! Desbloqueie-o antes de aplicar esforço.");
+      showFeedback('🛑 Impedimento!', 'Você não pode trabalhar em um cartão bloqueado! Desbloqueie-o primeiro (Swarming).', 'error');
       return;
     }
 
     // Consume from capacity
     if (capacity[effortType] < amount) {
-      alert('Capacidade insuficiente para este dia!');
+      showFeedback('🔋 Capacidade Esgotada', `A equipe de ${effortType.toUpperCase()} não possui mais horas disponíveis neste dia.\n\nLembre-se: horas importam menos que eficiência. Avance para o Próximo Dia para continuar fluindo!`, 'warning');
       return;
     }
     setCapacity(prev => ({ ...prev, [effortType]: prev[effortType] - amount }));
@@ -145,7 +176,7 @@ export const GameProvider = ({ children }) => {
     );
 
     if (activeCards.length === 0) {
-      alert("Nenhum cartão ativo para bloquear!");
+      showFeedback('ℹ️ Sem cartas', 'Não há nenhum cartão ativo no fluxo para bloquear no momento.', 'info');
       return;
     }
 
@@ -155,7 +186,7 @@ export const GameProvider = ({ children }) => {
       c.id === randomCard.id ? { ...c, isBlocked: true } : c
     ));
     
-    alert(`O cartão "${randomCard.title}" sofreu um impedimento! Swarming necessário!`);
+    showFeedback('🛑 Impedimento Gerado!', `O cartão "${randomCard.title}" sofreu um impedimento crítico e foi bloqueado.\n\nA equipe deve fazer um Swarming (Enxame) para remover o impedimento o mais rápido possível!`, 'error');
   };
 
   const unblockCard = (cardId) => {
@@ -169,13 +200,18 @@ export const GameProvider = ({ children }) => {
     cards,
     turn,
     capacity,
+    teamConfig,
     history,
+    feedback,
+    showFeedback,
+    closeFeedback,
     nextTurn,
     moveCard,
     applyEffort,
     resetGame,
     blockRandomCard,
-    unblockCard
+    unblockCard,
+    updateTeamConfig
   };
 
   return (

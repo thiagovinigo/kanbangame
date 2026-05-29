@@ -11,11 +11,15 @@ export const Card = ({ card }) => {
     data: { ...card },
   });
   
-  const { applyEffort, capacity, unblockCard } = useGame();
+  const { applyEffort, capacity, unblockCard, showFeedback } = useGame();
 
   const handleUnblock = (e) => {
     e.stopPropagation();
-    alert(`💡 O Kanban diz:\n\n1. Bloqueios NÃO saem da coluna.\n2. Consomem limite de WIP (gerando dor no time).\n3. Requerem Sinalização Visual forte.\n4. O time deve fazer Swarming para resolver o mais rápido possível.\n5. O relógio do Lead Time não para, prejudicando a Eficiência do Fluxo!`);
+    showFeedback(
+      '💡 Resolvendo Impedimentos', 
+      'Você removeu o bloqueio deste cartão.\n\nLembre-se da teoria Kanban:\n1. Bloqueios NÃO saem da coluna.\n2. Consomem limite de WIP (gerando "dor" no time).\n3. Requerem Sinalização Visual forte.\n4. O time deve fazer Swarming (Enxame) para resolver rápido.', 
+      'info'
+    );
     unblockCard(card.id);
   };
 

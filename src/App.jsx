@@ -5,6 +5,7 @@ import { ControlPanel } from './components/ControlPanel';
 import { MetricsPanel } from './components/MetricsPanel';
 import { KanbanGuide } from './components/KanbanGuide';
 import { PolicyModal } from './components/PolicyModal';
+import { FeedbackModal } from './components/FeedbackModal';
 import { LayoutDashboard, GraduationCap } from 'lucide-react';
 import './index.css';
 
@@ -35,9 +36,9 @@ function AppContent() {
         <Board onOpenPolicy={(col) => setPolicyColumn(col)} />
         <MetricsPanel />
       </main>
-
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
+      <FeedbackModal />
     </div>
   );
 }

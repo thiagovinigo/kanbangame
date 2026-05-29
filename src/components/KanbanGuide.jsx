@@ -14,7 +14,8 @@ export const KanbanGuide = ({ isOpen, onClose }) => {
     { id: 4, title: 'Impedimentos (Blockers)', icon: AlertOctagon },
     { id: 5, title: 'Classes de Serviço', icon: Tags },
     { id: 6, title: 'Métricas Kanban', icon: BarChart2 },
-    { id: 7, title: 'Como Jogar o Simulador', icon: Gamepad2 }
+    { id: 7, title: 'Cadências (Material Completo)', icon: Info },
+    { id: 8, title: 'Como Jogar o Simulador', icon: Gamepad2 }
   ];
 
   const renderContent = () => {
@@ -26,7 +27,8 @@ export const KanbanGuide = ({ isOpen, onClose }) => {
       case 4: return <Impedimentos />;
       case 5: return <ClassesServico />;
       case 6: return <Metricas />;
-      case 7: return <Simulador />;
+      case 7: return <Cadencias />;
+      case 8: return <Simulador />;
       default: return null;
     }
   };
@@ -354,5 +356,42 @@ const Simulador = () => (
       <li><strong>O Próximo Dia:</strong> Quando suas horas acabarem, clique em "Próximo Dia" no Painel de Controle. A equipe dorme e acorda com as horas recarregadas. O relógio das métricas avança!</li>
       <li><strong>Bloqueios Surpresa:</strong> Use o botão <strong>Simular Bloqueio</strong> para travar um cartão ativo. Veja o impacto que isso causa na coluna e no seu fluxo antes de clicar em "Resolver"!</li>
     </ol>
+  </div>
+);
+
+const Cadencias = () => (
+  <div>
+    <h1 style={{ color: 'var(--accent-blue)', marginBottom: '16px' }}>8. Cadências (Material Completo)</h1>
+    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '32px' }}>O Kanban não é apenas um quadro, é um sistema gerencial que possui <strong>reuniões e ciclos de feedback (Cadências)</strong> para garantir o alinhamento da estratégia com a entrega.</p>
+
+    <div style={{ background: 'var(--bg-secondary)', padding: '40px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+      <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '20px', borderRadius: '50%' }}>
+        <BookOpen size={48} color="var(--accent-blue)" />
+      </div>
+      <div>
+        <h2 style={{ margin: '0 0 12px 0', color: 'var(--text-primary)' }}>Aprofunde-se nas Cadências</h2>
+        <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
+          Preparamos um material complementar exclusivo detalhando as 7 cadências do Kanban, desde a Reunião Diária (Kanban Meeting) até as revisões estratégicas.
+        </p>
+      </div>
+      <a 
+        href="/material_treinamento.html" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{ 
+          display: 'inline-flex', alignItems: 'center', gap: '12px',
+          background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))',
+          color: 'white', padding: '16px 32px', borderRadius: '8px', 
+          textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem',
+          boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)', transition: 'transform 0.2s'
+        }}
+        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        <BookOpen size={24} />
+        Acessar Material Completo
+      </a>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>*O arquivo abrirá em uma nova guia interativa em tela cheia.</p>
+    </div>
   </div>
 );
