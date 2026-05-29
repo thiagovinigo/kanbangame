@@ -83,6 +83,18 @@ export const RulesModal = ({ isOpen, onClose }) => {
             <li><strong>Avance o Dia:</strong> Quando não tiver mais capacidade disponível ou horas para gastar, clique em "Próximo Dia" para a equipe dormir, acordar com as energias recarregadas e iniciar o próximo turno.</li>
             <li><strong>Métricas:</strong> Observe o gráfico de "Tempo de Entrega" para ver quanto tempo os cartões levam para ser entregues, e o "Fluxo Cumulativo" para observar os gargalos ao longo dos dias.</li>
           </ol>
+
+          <h3 style={{ marginTop: '12px', marginBottom: '8px', color: 'var(--accent-rose)' }}>Lidando com Bloqueios (Blockers)</h3>
+          <div style={{ background: 'rgba(244, 63, 94, 0.05)', padding: '16px', borderRadius: '8px', borderLeft: '4px solid var(--accent-rose)', fontSize: '0.9rem' }}>
+            <p style={{ margin: '0 0 12px 0' }}>Na teoria do método Kanban, o tratamento de itens bloqueados tem regras muito claras e um propósito forte de melhoria contínua:</p>
+            <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <li><strong>1. Eles não saem da coluna:</strong> Não existe coluna "Blocked". O item bloqueado deve permanecer exatamente onde está, pois o trabalho continua em progresso (ainda não gerou valor). Esconder numa coluna genérica faz perder o contexto de onde ocorreu o gargalo.</li>
+              <li><strong>2. Consomem o limite de WIP:</strong> Um item bloqueado continua ocupando espaço no limite de WIP da coluna. Isso causa "dor" no time, forçando-o a parar de começar coisas novas e focar em desbloquear o que já começou ("Pare de começar, comece a terminar").</li>
+              <li><strong>3. Sinalização Visual (Gestão Visual):</strong> A recomendação é colocar uma sinalização forte e gritante (ex: botão vermelho, adesivo neon). Qualquer um que bater o olho no quadro precisa saber instantaneamente: "Temos um problema ali!".</li>
+              <li><strong>4. Swarming (Enxame):</strong> Quando um item bloqueia, a política ideal é que o time faça "Swarming". Os membros devem parar o que estão fazendo e se reunir para ajudar a remover o bloqueio o mais rápido possível, antes de puxar um novo cartão do backlog.</li>
+              <li><strong>5. Prejudicam as Métricas:</strong> O tempo que o cartão passa bloqueado não pausa o relógio do Lead Time. Esse tempo de espera prejudica severamente a Eficiência de Fluxo, forçando a empresa a olhar para as causas raízes dos bloqueios nas retrospectivas.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
-import { FastForward, RotateCcw, Users, UserCheck, UserCog } from 'lucide-react';
+import { FastForward, RotateCcw, Users, UserCheck, UserCog, AlertOctagon } from 'lucide-react';
 
 export const ControlPanel = () => {
-  const { turn, capacity, nextTurn, resetGame } = useGame();
+  const { turn, capacity, nextTurn, resetGame, blockRandomCard } = useGame();
 
   return (
     <div className="glass-panel" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -48,6 +48,11 @@ export const ControlPanel = () => {
         >
           <RotateCcw size={18} />
           Reiniciar
+        </button>
+
+        <button className="btn btn-secondary" onClick={blockRandomCard}>
+          <AlertOctagon size={18} color="var(--accent-rose)" />
+          Simular Bloqueio
         </button>
 
         <button className="btn btn-primary" onClick={nextTurn}>

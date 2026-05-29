@@ -3,9 +3,9 @@ import { GameProvider } from './context/GameContext';
 import { Board } from './components/Board';
 import { ControlPanel } from './components/ControlPanel';
 import { MetricsPanel } from './components/MetricsPanel';
-import { RulesModal } from './components/RulesModal';
+import { KanbanGuide } from './components/KanbanGuide';
 import { PolicyModal } from './components/PolicyModal';
-import { LayoutDashboard, BookOpen } from 'lucide-react';
+import { LayoutDashboard, GraduationCap } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -25,8 +25,8 @@ function AppContent() {
           </div>
         </div>
         <button className="btn btn-secondary" onClick={() => setIsRulesOpen(true)}>
-          <BookOpen size={18} />
-          Regras
+          <GraduationCap size={18} />
+          Aprender Kanban
         </button>
       </header>
       
@@ -36,7 +36,7 @@ function AppContent() {
         <MetricsPanel />
       </main>
 
-      <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
+      <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
     </div>
   );

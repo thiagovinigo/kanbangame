@@ -41,10 +41,35 @@ export const PolicyModal = ({ isOpen, onClose, column }) => {
           Política da Coluna
         </h2>
 
-        <h3 style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>{column.title}</h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
-          {column.policy}
-        </p>
+        <h3 style={{ color: 'var(--text-primary)', marginBottom: '16px' }}>{column.title}</h3>
+        
+        {/* Status Badge */}
+        <div style={{ marginBottom: '20px' }}>
+          {(column.role === 'queue' || column.role === 'done') && (
+            <span style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)', padding: '6px 12px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold', border: '1px dashed rgba(245, 158, 11, 0.5)' }}>
+              ⏳ Fila de Espera (Wait State)
+            </span>
+          )}
+          {column.role === 'active' && (
+            <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: 'var(--accent-blue)', padding: '6px 12px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold', border: '1px solid rgba(59, 130, 246, 0.5)' }}>
+              🔥 Fase Ativa (Doing)
+            </span>
+          )}
+          {column.role === 'completed' && (
+            <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-emerald)', padding: '6px 12px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold', border: '1px solid rgba(16, 185, 129, 0.5)' }}>
+              ✅ Finalizado
+            </span>
+          )}
+        </div>
+
+        <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>
+          {column.policy.split('\n').map((line, i) => (
+            <React.Fragment key={i}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </div>
         
         {column.limit > 0 ? (
           <div style={{ marginTop: '16px', padding: '8px', background: 'rgba(244, 63, 94, 0.1)', borderRadius: '8px', color: 'var(--accent-rose)' }}>

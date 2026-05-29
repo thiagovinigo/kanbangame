@@ -53,6 +53,11 @@ export const GameProvider = ({ children }) => {
     const card = cards.find(c => c.id === cardId);
     if (!card || card.columnId === toColumnId) return;
 
+    if (card.isBlocked) {
+      alert("Este cartão está bloqueado! Você precisa desbloqueá-lo antes de movê-lo.");
+      return;
+    }
+
     const targetColumn = columns.find(c => c.id === toColumnId);
     if (!targetColumn) return;
 
@@ -105,6 +110,13 @@ export const GameProvider = ({ children }) => {
   };
 
   const applyEffort = (cardId, effortType, amount = 1) => {
+    const card = cards.find(c => c.id === cardId);
+    if (!card) return;
+    if (card.isBlocked) {
+      alert("Cartão bloqueado! Desbloqueie-o antes de aplicar esforço.");
+      return;
+    }
+
     // Consume from capacity
     if (capacity[effortType] < amount) {
       alert('Capacidade insuficiente para este dia!');
@@ -125,6 +137,33 @@ export const GameProvider = ({ children }) => {
     });
   };
 
+  const blockRandomCard = () => {
+    const activeCards = cards.filter(c => 
+      c.columnId !== 'col-backlog' && 
+      c.columnId !== 'col-deploy' && 
+      !c.isBlocked
+    );
+
+    if (activeCards.length === 0) {
+      alert("Nenhum cartão ativo para bloquear!");
+      return;
+    }
+
+    const randomCard = activeCards[Math.floor(Math.random() * activeCards.length)];
+    
+    setCards(prev => prev.map(c => 
+      c.id === randomCard.id ? { ...c, isBlocked: true } : c
+    ));
+    
+    alert(`O cartão "${randomCard.title}" sofreu um impedimento! Swarming necessário!`);
+  };
+
+  const unblockCard = (cardId) => {
+    setCards(prev => prev.map(c => 
+      c.id === cardId ? { ...c, isBlocked: false } : c
+    ));
+  };
+
   const value = {
     columns,
     cards,
@@ -134,7 +173,9 @@ export const GameProvider = ({ children }) => {
     nextTurn,
     moveCard,
     applyEffort,
-    resetGame
+    resetGame,
+    blockRandomCard,
+    unblockCard
   };
 
   return (

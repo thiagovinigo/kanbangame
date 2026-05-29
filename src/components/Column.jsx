@@ -16,6 +16,7 @@ export const Column = ({ column }) => {
   });
   
   const isOverLimit = column.limit > 0 && columnCards.length > column.limit;
+  const isWaitState = column.role === 'queue' || column.role === 'done';
 
   return (
     <div 
@@ -25,8 +26,10 @@ export const Column = ({ column }) => {
         maxWidth: '280px',
         display: 'flex',
         flexDirection: 'column',
-        background: isOver ? 'var(--bg-glass-hover)' : 'var(--bg-glass)',
-        border: isOverLimit ? '1px solid var(--accent-rose)' : '1px solid var(--border-glass)',
+        background: isWaitState 
+          ? (isOver ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.05)') 
+          : (isOver ? 'var(--bg-glass-hover)' : 'var(--bg-glass)'),
+        border: isOverLimit ? '1px solid var(--accent-rose)' : (isWaitState ? '1px dashed rgba(245, 158, 11, 0.5)' : '1px solid var(--border-glass)'),
         transition: 'all 0.2s ease'
       }}
     >
@@ -37,9 +40,16 @@ export const Column = ({ column }) => {
         justifyContent: 'space-between',
         alignItems: 'center'
       }}>
-        <h3 style={{ fontSize: '1rem', color: isOverLimit ? 'var(--accent-rose)' : 'var(--text-primary)' }}>
-          {column.title}
-        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <h3 style={{ fontSize: '1rem', margin: 0, color: isOverLimit ? 'var(--accent-rose)' : 'var(--text-primary)' }}>
+            {column.title}
+          </h3>
+          {isWaitState && (
+            <span style={{ fontSize: '0.7rem', color: 'var(--accent-amber)', fontWeight: 'bold', textTransform: 'uppercase' }}>
+              ⏳ Fila de Espera (Wait)
+            </span>
+          )}
+        </div>
         {column.limit > 0 && (
           <span style={{ 
             fontSize: '0.8rem', 

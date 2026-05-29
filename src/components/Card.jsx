@@ -11,7 +11,13 @@ export const Card = ({ card }) => {
     data: { ...card },
   });
   
-  const { applyEffort, capacity } = useGame();
+  const { applyEffort, capacity, unblockCard } = useGame();
+
+  const handleUnblock = (e) => {
+    e.stopPropagation();
+    alert(`💡 O Kanban diz:\n\n1. Bloqueios NÃO saem da coluna.\n2. Consomem limite de WIP (gerando dor no time).\n3. Requerem Sinalização Visual forte.\n4. O time deve fazer Swarming para resolver o mais rápido possível.\n5. O relógio do Lead Time não para, prejudicando a Eficiência do Fluxo!`);
+    unblockCard(card.id);
+  };
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -41,13 +47,21 @@ export const Card = ({ card }) => {
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
-        position: 'relative'
+        position: 'relative',
+        border: card.isBlocked ? '2px solid var(--accent-rose)' : '1px solid var(--border-glass)',
+        backgroundColor: card.isBlocked ? 'rgba(244, 63, 94, 0.05)' : 'var(--bg-secondary)'
       }}
       {...attributes} 
       {...listeners}
       className="glass-panel"
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {card.isBlocked && (
+        <div style={{ position: 'absolute', top: '-12px', right: '-12px', background: 'var(--accent-rose)', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(244, 63, 94, 0.4)', zIndex: 10 }}>
+          <span style={{ fontSize: '18px' }}>🛑</span>
+        </div>
+      )}
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
           {getIcon()}
           {card.type}
@@ -62,7 +76,18 @@ export const Card = ({ card }) => {
       
       <h4 style={{ fontSize: '0.9rem', margin: '4px 0' }}>{card.title}</h4>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      {card.isBlocked ? (
+        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(244, 63, 94, 0.1)', padding: '12px', borderRadius: '8px', alignItems: 'center' }}>
+          <span style={{ color: 'var(--accent-rose)', fontSize: '0.85rem', fontWeight: 'bold' }}>IMPEDIMENTO!</span>
+          <button 
+            onPointerDown={handleUnblock}
+            style={{ width: '100%', background: 'var(--accent-rose)', color: 'white', border: 'none', borderRadius: '4px', padding: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            ✅ Resolver
+          </button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {card.effortTotal.dev > 0 && (
           <div style={{ 
             background: card.effortLeft.dev === 0 ? 'rgba(59, 130, 246, 0.05)' : 'rgba(59, 130, 246, 0.15)', 
@@ -171,6 +196,7 @@ export const Card = ({ card }) => {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };

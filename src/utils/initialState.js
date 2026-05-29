@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 
 export const initialColumns = [
-  { id: 'col-backlog', title: 'Backlog', limit: 0, role: 'queue', policy: 'Priorizado pelo PO. Sem compromisso ainda.' },
-  { id: 'col-selected', title: 'Selecionado (Ready)', limit: 4, role: 'queue', policy: 'Ponto de compromisso. Devs puxam daqui.' },
-  { id: 'col-dev-doing', title: 'Dev (Fazendo)', limit: 3, role: 'active', policy: 'Código em andamento. Máximo 3.' },
-  { id: 'col-dev-done', title: 'Dev (Feito)', limit: 0, role: 'done', policy: 'Fila de espera para QA. Nenhum esforço de Dev.' },
-  { id: 'col-qa-doing', title: 'QA (Fazendo)', limit: 2, role: 'active', policy: 'Testes em andamento. Máximo 2.' },
-  { id: 'col-qa-done', title: 'QA (Feito)', limit: 0, role: 'done', policy: 'Fila de espera para UAT. Nenhum esforço de QA.' },
-  { id: 'col-uat-doing', title: 'UAT (Fazendo)', limit: 2, role: 'active', policy: 'Validação pelo Cliente. Máximo 2.' },
-  { id: 'col-uat-done', title: 'UAT (Feito)', limit: 0, role: 'done', policy: 'Aprovado. Pronto para produção.' },
-  { id: 'col-deploy', title: 'Implantado (Deploy)', limit: 0, role: 'completed', policy: 'Em produção para os usuários.' },
+  { id: 'col-backlog', title: 'Backlog', limit: 0, role: 'queue', policy: 'Ideias e requisitos brutos.\n\n• Entrada: Qualquer stakeholder pode sugerir ideias.\n• Saída: O Product Owner detalha (Definition of Ready) e as prioriza para a próxima seleção.' },
+  { id: 'col-selected', title: 'Selecionado (Ready)', limit: 4, role: 'queue', policy: 'Ponto de Comprometimento (Commitment Point).\n\n• Entrada: O PO prioriza os itens do topo do Backlog na Reunião de Replenishment.\n• Saída: Os devs "puxam" o item do topo apenas quando tiverem vaga no seu Limite de WIP.' },
+  { id: 'col-dev-doing', title: 'Dev (Fazendo)', limit: 3, role: 'active', policy: 'Fase ativa de desenvolvimento.\n\n• Entrada: Puxado do Ready. Requisitos devem estar 100% claros.\n• Saída: Código finalizado, testes locais criados, e Code Review (PR) aprovado por 1 colega.' },
+  { id: 'col-dev-done', title: 'Dev (Feito)', limit: 0, role: 'done', policy: 'Buffer. Aguardando capacidade da Qualidade.\n\n• Entrada: Código foi mergeado na branch de Staging.\n• Saída: O analista de QA "puxa" para teste quando o limite de WIP dele permitir.' },
+  { id: 'col-qa-doing', title: 'QA (Fazendo)', limit: 2, role: 'active', policy: 'Fase ativa de Validação e Qualidade.\n\n• Entrada: Puxado do Dev Done.\n• Saída: Testes exploratórios concluídos, sem bugs críticos encontrados e evidências anexadas ao ticket.' },
+  { id: 'col-qa-done', title: 'QA (Feito)', limit: 0, role: 'done', policy: 'Buffer. Aguardando aceite de negócios.\n\n• Entrada: QA aplicou o selo técnico de aprovação.\n• Saída: O PO ou Cliente (UAT) puxa o cartão para homologar o valor de negócio entregue.' },
+  { id: 'col-uat-doing', title: 'UAT (Fazendo)', limit: 2, role: 'active', policy: 'Homologação pelo Cliente (User Acceptance Testing).\n\n• Entrada: Puxado do QA Done.\n• Saída: Aceite formal do negócio documentado (via sistema ou e-mail).' },
+  { id: 'col-uat-done', title: 'UAT (Feito)', limit: 0, role: 'done', policy: 'Buffer. Fila para entrar em Produção.\n\n• Entrada: Aceite formal do cliente recebido.\n• Saída: Janela de Deploy chegou (Release puxada via pipeline).' },
+  { id: 'col-deploy', title: 'Implantado (Deploy)', limit: 0, role: 'completed', policy: 'Ponto de Entrega (Delivery Point).\n\n• Entrada: Código publicado com sucesso em produção.\nO relógio do Lead Time é interrompido.' },
 ];
 
 export const initialCards = [
@@ -25,6 +25,7 @@ export const initialCards = [
     completedAt: null,
     activeTime: 0,
     waitTime: 0,
+    isBlocked: false,
   },
   {
     id: uuidv4(),
@@ -38,6 +39,7 @@ export const initialCards = [
     completedAt: null,
     activeTime: 0,
     waitTime: 0,
+    isBlocked: false,
   },
   {
     id: uuidv4(),
@@ -51,6 +53,7 @@ export const initialCards = [
     completedAt: null,
     activeTime: 0,
     waitTime: 0,
+    isBlocked: false,
   },
   {
     id: uuidv4(),
@@ -65,6 +68,7 @@ export const initialCards = [
     activeTime: 0,
     waitTime: 0,
     dueDate: 5,
+    isBlocked: false,
   },
   {
     id: uuidv4(),
@@ -78,6 +82,7 @@ export const initialCards = [
     completedAt: null,
     activeTime: 0,
     waitTime: 0,
+    isBlocked: false,
   }
 ];
 
