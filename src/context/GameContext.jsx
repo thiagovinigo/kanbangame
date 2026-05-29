@@ -15,7 +15,9 @@ export const GameProvider = ({ children }) => {
   const [feedback, setFeedback] = useState(null);
 
   const showFeedback = (title, message, type = 'error') => {
-    setFeedback({ title, message, type });
+    setTimeout(() => {
+      setFeedback({ title, message, type });
+    }, 150);
   };
   const closeFeedback = () => setFeedback(null);
 

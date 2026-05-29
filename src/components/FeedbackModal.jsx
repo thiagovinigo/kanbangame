@@ -28,8 +28,8 @@ export const FeedbackModal = () => {
   const style = getStyle();
 
   return (
-    <div className="modal-overlay" style={{ zIndex: 10000 }}>
-      <div className="modal-content animate-fade-in" style={{ maxWidth: '500px', borderTop: `4px solid ${style.border}` }}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999999 }}>
+      <div className="modal-content animate-fade-in" style={{ maxWidth: '500px', borderTop: `4px solid ${style.border}`, position: 'relative' }}>
         <button className="modal-close" onClick={closeFeedback}><X size={20} /></button>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
