@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DndContext, pointerWithin, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { useGame } from '../context/GameContext';
 import { ColumnCell } from './ColumnCell';
@@ -6,6 +6,7 @@ import { Info } from 'lucide-react';
 
 export const Board = ({ onOpenPolicy }) => {
   const { columns, moveCard, showFeedback } = useGame();
+  const [showCommitmentTooltip, setShowCommitmentTooltip] = useState(false);
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -79,10 +80,28 @@ export const Board = ({ onOpenPolicy }) => {
           ))}
 
           {/* Commitment Point Header Divider */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: 'var(--accent-rose)', fontWeight: 'bold', fontSize: '0.75rem', letterSpacing: '1px', textAlign: 'center', whiteSpace: 'nowrap' }}>
-               COMPROMETIMENTO
+          <div 
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', cursor: 'help' }}
+            onMouseEnter={() => setShowCommitmentTooltip(true)}
+            onMouseLeave={() => setShowCommitmentTooltip(false)}
+          >
+            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', color: 'var(--accent-rose)', fontWeight: 'bold', fontSize: '0.85rem', letterSpacing: '1px', textAlign: 'center', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '8px' }}>
+               <Info size={16} style={{ transform: 'rotate(90deg)' }} /> COMPROMETIMENTO
             </div>
+            
+            {showCommitmentTooltip && (
+              <div className="glass-panel animate-fade-in" style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', width: '250px', padding: '12px', zIndex: 100, borderTop: '3px solid var(--accent-rose)', background: 'var(--bg-secondary)', marginTop: '8px' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-rose)', fontSize: '0.9rem' }}>Ponto de Comprometimento</h4>
+                <p style={{ margin: '0 0 8px 0', fontSize: '0.8rem', color: 'var(--text-primary)' }}>
+                  A partir desta linha, o time assume o compromisso de entregar o cartão ao cliente. O foco muda de "selecionar" para "terminar".
+                </p>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(244, 63, 94, 0.05)', padding: '8px', borderRadius: '4px' }}>
+                  <strong>Métricas acionadas a partir daqui:</strong><br/>
+                  ⏳ Lead Time (Tempo de Entrega)<br/>
+                  📈 Eficiência de Fluxo
+                </div>
+              </div>
+            )}
           </div>
 
           {downstreamCols.map(col => (
