@@ -10,7 +10,8 @@ import { ReplenishmentModal } from './components/ReplenishmentModal';
 import { DailyModal } from './components/DailyModal';
 import { DailyGuidePanel } from './components/DailyGuidePanel';
 import { RetrospectiveDashboard } from './components/RetrospectiveDashboard';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3 } from 'lucide-react';
+import { DemoModal } from './components/DemoModal';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -19,6 +20,7 @@ function AppContent() {
   const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
   const [isDailyOpen, setIsDailyOpen] = useState(false);
   const [isRetroOpen, setIsRetroOpen] = useState(false);
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   return (
     <div className="app-container">
@@ -33,6 +35,10 @@ function AppContent() {
           </div>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-secondary" onClick={() => setIsDemoOpen(true)} title="Fazer Reunião de Demonstração (Review)" style={{ borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)' }}>
+            <Presentation size={18} />
+            Demo
+          </button>
           <button className="btn btn-secondary" onClick={() => setIsRetroOpen(true)} title="Fazer Service Delivery Review" style={{ borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
             <BarChart3 size={18} />
             Retrospectiva
@@ -61,6 +67,7 @@ function AppContent() {
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
       <DailyModal isOpen={isDailyOpen} onClose={() => setIsDailyOpen(false)} />
       <RetrospectiveDashboard isOpen={isRetroOpen} onClose={() => setIsRetroOpen(false)} />
+      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
       <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <FeedbackModal />

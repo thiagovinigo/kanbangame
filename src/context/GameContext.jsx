@@ -203,6 +203,49 @@ export const GameProvider = ({ children }) => {
     ));
   };
 
+  const simulateCustomerFeedback = () => {
+    let approvedCount = 0;
+    let rejectedCount = 0;
+    const rejectedTitles = [];
+
+    setCards(prevCards => {
+      return prevCards.map(c => {
+        if (c.columnId === 'col-deploy' && !c.customerValidated) {
+          // 20% chance of rejection
+          const isRejected = Math.random() < 0.2;
+          
+          if (isRejected) {
+            rejectedCount++;
+            rejectedTitles.push(c.title);
+            // Send back to backlog and mark as a bug/rework
+            return { 
+              ...c, 
+              columnId: 'col-backlog', 
+              startedAt: null,
+              completedAt: null,
+              title: `[RETRABALHO] ${c.title}`,
+              effortLeft: { dev: c.effortTotal.dev || 1, test: c.effortTotal.test || 1, uat: c.effortTotal.uat || 1 }
+            };
+          } else {
+            approvedCount++;
+            return { ...c, customerValidated: true };
+          }
+        }
+        return c;
+      });
+    });
+
+    if (rejectedCount > 0) {
+      showFeedback('😱 Cliente Rejeitou Entregas!', `O cliente não validou ${rejectedCount} cartão(ões) (${rejectedTitles.join(', ')}). O escopo estava incorreto e eles voltaram para o Backlog como retrabalho!`, 'error');
+    } else if (approvedCount > 0) {
+      showFeedback('🎉 Sucesso na Demo!', `O cliente adorou as ${approvedCount} entregas! Valor gerado com sucesso.`, 'info');
+    } else {
+      showFeedback('ℹ️ Sem Entregas Novas', 'Não há cartões não-validados na coluna de Deploy para apresentar.', 'info');
+    }
+
+    return { approvedCount, rejectedCount };
+  };
+
   const value = {
     columns,
     cards,
@@ -224,7 +267,8 @@ export const GameProvider = ({ children }) => {
     startDaily,
     nextDailyStep,
     prevDailyStep,
-    stopDaily
+    stopDaily,
+    simulateCustomerFeedback
   };
 
   return (
