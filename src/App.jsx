@@ -9,7 +9,8 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { ReplenishmentModal } from './components/ReplenishmentModal';
 import { DailyModal } from './components/DailyModal';
 import { DailyGuidePanel } from './components/DailyGuidePanel';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity } from 'lucide-react';
+import { RetrospectiveDashboard } from './components/RetrospectiveDashboard';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3 } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -17,6 +18,7 @@ function AppContent() {
   const [policyColumn, setPolicyColumn] = useState(null);
   const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
   const [isDailyOpen, setIsDailyOpen] = useState(false);
+  const [isRetroOpen, setIsRetroOpen] = useState(false);
 
   return (
     <div className="app-container">
@@ -31,6 +33,10 @@ function AppContent() {
           </div>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-secondary" onClick={() => setIsRetroOpen(true)} title="Fazer Service Delivery Review" style={{ borderColor: 'var(--accent-purple)', color: 'var(--accent-purple)' }}>
+            <BarChart3 size={18} />
+            Retrospectiva
+          </button>
           <button className="btn btn-secondary" onClick={() => setIsDailyOpen(true)} title="Fazer Reunião Diária (Kanban Meeting)" style={{ borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)' }}>
             <Activity size={18} />
             Daily
@@ -54,6 +60,7 @@ function AppContent() {
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
       <DailyModal isOpen={isDailyOpen} onClose={() => setIsDailyOpen(false)} />
+      <RetrospectiveDashboard isOpen={isRetroOpen} onClose={() => setIsRetroOpen(false)} />
       <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <FeedbackModal />
