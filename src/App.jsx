@@ -6,12 +6,14 @@ import { MetricsPanel } from './components/MetricsPanel';
 import { KanbanGuide } from './components/KanbanGuide';
 import { PolicyModal } from './components/PolicyModal';
 import { FeedbackModal } from './components/FeedbackModal';
-import { LayoutDashboard, GraduationCap } from 'lucide-react';
+import { ReplenishmentModal } from './components/ReplenishmentModal';
+import { LayoutDashboard, GraduationCap, UserPlus } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [policyColumn, setPolicyColumn] = useState(null);
+  const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
 
   return (
     <div className="app-container">
@@ -25,10 +27,16 @@ function AppContent() {
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Aprenda Fluxo & Limites</span>
           </div>
         </div>
-        <button className="btn btn-secondary" onClick={() => setIsRulesOpen(true)}>
-          <GraduationCap size={18} />
-          Aprender Kanban
-        </button>
+        <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-secondary" onClick={() => setIsReplenishmentOpen(true)} title="Fazer Reunião de Replenishment" style={{ borderColor: 'var(--accent-emerald)', color: 'var(--accent-emerald)' }}>
+            <UserPlus size={18} />
+            Replenishment
+          </button>
+          <button className="btn btn-secondary" onClick={() => setIsRulesOpen(true)}>
+            <GraduationCap size={18} />
+            Aprender Kanban
+          </button>
+        </div>
       </header>
       
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -37,6 +45,7 @@ function AppContent() {
         <MetricsPanel />
       </main>
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
+      <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <FeedbackModal />
     </div>
