@@ -7,13 +7,15 @@ import { KanbanGuide } from './components/KanbanGuide';
 import { PolicyModal } from './components/PolicyModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { ReplenishmentModal } from './components/ReplenishmentModal';
-import { LayoutDashboard, GraduationCap, UserPlus } from 'lucide-react';
+import { DailyModal } from './components/DailyModal';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [policyColumn, setPolicyColumn] = useState(null);
   const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
+  const [isDailyOpen, setIsDailyOpen] = useState(false);
 
   return (
     <div className="app-container">
@@ -28,6 +30,10 @@ function AppContent() {
           </div>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-secondary" onClick={() => setIsDailyOpen(true)} title="Fazer Reunião Diária (Kanban Meeting)" style={{ borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)' }}>
+            <Activity size={18} />
+            Daily
+          </button>
           <button className="btn btn-secondary" onClick={() => setIsReplenishmentOpen(true)} title="Fazer Reunião de Replenishment" style={{ borderColor: 'var(--accent-emerald)', color: 'var(--accent-emerald)' }}>
             <UserPlus size={18} />
             Replenishment
@@ -46,6 +52,7 @@ function AppContent() {
       </main>
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
+      <DailyModal isOpen={isDailyOpen} onClose={() => setIsDailyOpen(false)} />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <FeedbackModal />
     </div>
