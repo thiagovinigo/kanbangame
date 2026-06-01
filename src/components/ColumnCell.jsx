@@ -1,10 +1,16 @@
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { useGame } from '../context/GameContext';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card } from './Card';
+import { useGame } from '../context/GameContext';
 
 export const ColumnCell = ({ column, swimlane }) => {
-  const { cards } = useGame();
+  const { cards, dailyStep, columns } = useGame();
+  
+  // Calculate if we are in Daily Walk the Board mode and if this column is out of focus
+  const isDailyMode = dailyStep !== null;
+  const currentDailyColId = isDailyMode ? columns[dailyStep].id : null;
+  const isDimmed = isDailyMode && column.id !== currentDailyColId;
   
   // Filter cards for this specific column and swimlane
   const cellCards = cards.filter(c => {
@@ -37,10 +43,13 @@ export const ColumnCell = ({ column, swimlane }) => {
         minHeight: swimlane === 'expedite' ? '200px' : '400px',
         background: isOver ? 'var(--bg-glass-hover)' : 'var(--bg-glass)',
         border: isOverLimit ? '1px solid var(--accent-rose)' : '1px solid var(--border-glass)',
-        transition: 'all 0.2s ease',
+        transition: 'opacity 0.3s ease, all 0.2s ease',
         display: 'flex',
         flexDirection: 'column',
-        gap: '8px'
+        gap: '8px',
+        opacity: isDimmed ? 0.3 : 1,
+        pointerEvents: isDimmed ? 'none' : 'auto',
+        position: 'relative'
       }}
     >
       {cellCards.map(card => (

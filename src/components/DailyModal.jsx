@@ -1,7 +1,10 @@
 import React from 'react';
 import { X, Activity, ArrowLeftRight, AlertOctagon, Clock, Users } from 'lucide-react';
+import { useGame } from '../context/GameContext';
 
 export const DailyModal = ({ isOpen, onClose }) => {
+  const { startDaily } = useGame();
+
   if (!isOpen) return null;
 
   return (
@@ -64,7 +67,10 @@ export const DailyModal = ({ isOpen, onClose }) => {
         <button 
           className="btn btn-primary" 
           style={{ width: '100%', justifyContent: 'center', background: 'var(--accent-blue)' }}
-          onClick={onClose}
+          onClick={() => {
+            startDaily();
+            onClose();
+          }}
         >
           Iniciar Daily (Walk the Board)
         </button>

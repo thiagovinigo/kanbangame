@@ -5,8 +5,10 @@ import { ColumnCell } from './ColumnCell';
 import { Info } from 'lucide-react';
 
 export const Board = ({ onOpenPolicy }) => {
-  const { columns, moveCard, showFeedback } = useGame();
+  const { columns, moveCard, showFeedback, dailyStep } = useGame();
   const [showCommitmentTooltip, setShowCommitmentTooltip] = useState(false);
+  const isDailyMode = dailyStep !== null;
+  const currentDailyColId = isDailyMode ? columns[dailyStep].id : null;
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -64,7 +66,7 @@ export const Board = ({ onOpenPolicy }) => {
           <div style={{ padding: '12px' }}></div> {/* Empty top-left cell */}
           
           {upstreamCols.map(col => (
-            <div key={`header-${col.id}`} className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)' }}>
+            <div key={`header-${col.id}`} className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', opacity: (isDailyMode && col.id !== currentDailyColId) ? 0.3 : 1, transition: 'opacity 0.3s ease' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
                 <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>{col.title}</h3>
                 <button 
@@ -105,7 +107,7 @@ export const Board = ({ onOpenPolicy }) => {
           </div>
 
           {downstreamCols.map(col => (
-            <div key={`header-${col.id}`} className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)' }}>
+            <div key={`header-${col.id}`} className="glass-panel" style={{ padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'var(--bg-glass)', border: '1px solid var(--border-glass)', opacity: (isDailyMode && col.id !== currentDailyColId) ? 0.3 : 1, transition: 'opacity 0.3s ease' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 4px 0' }}>
                 <h3 style={{ fontSize: '1rem', color: 'var(--text-primary)', margin: 0 }}>{col.title}</h3>
                 <button 

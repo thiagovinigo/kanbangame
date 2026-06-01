@@ -8,6 +8,7 @@ import { PolicyModal } from './components/PolicyModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { ReplenishmentModal } from './components/ReplenishmentModal';
 import { DailyModal } from './components/DailyModal';
+import { DailyGuidePanel } from './components/DailyGuidePanel';
 import { LayoutDashboard, GraduationCap, UserPlus, Activity } from 'lucide-react';
 import './index.css';
 
@@ -53,6 +54,7 @@ function AppContent() {
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
       <DailyModal isOpen={isDailyOpen} onClose={() => setIsDailyOpen(false)} />
+      <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <FeedbackModal />
     </div>

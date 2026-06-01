@@ -13,6 +13,12 @@ export const GameProvider = ({ children }) => {
   const [capacity, setCapacity] = useState({ dev: 16, test: 8, uat: 8 });
   const [history, setHistory] = useState([]); // For CFD metrics
   const [feedback, setFeedback] = useState(null);
+  const [dailyStep, setDailyStep] = useState(null);
+
+  const startDaily = () => setDailyStep(7); // Start at UAT Done (index 7)
+  const nextDailyStep = () => setDailyStep(prev => (prev !== null && prev > 1) ? prev - 1 : null);
+  const prevDailyStep = () => setDailyStep(prev => (prev !== null && prev < 7) ? prev + 1 : prev);
+  const stopDaily = () => setDailyStep(null);
 
   const showFeedback = (title, message, type = 'error') => {
     setTimeout(() => {
@@ -213,7 +219,12 @@ export const GameProvider = ({ children }) => {
     resetGame,
     blockRandomCard,
     unblockCard,
-    updateTeamConfig
+    updateTeamConfig,
+    dailyStep,
+    startDaily,
+    nextDailyStep,
+    prevDailyStep,
+    stopDaily
   };
 
   return (
