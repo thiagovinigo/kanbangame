@@ -10,12 +10,12 @@ export const initialColumns = [
 
   // --- DOWNSTREAM ---
   { id: 'col-down-ready-dev', title: '[DOWN] Pronto para Desenvolvimento', limit: 3, role: 'queue', policy: 'Ponto de Comprometimento (Commitment Point).\n\n• Métrica: WIP, Cycle Time' },
-  { id: 'col-down-dev', title: '[DOWN] Em Desenvolvimento', limit: 3, role: 'active', policy: 'Fase ativa de desenvolvimento.' },
-  { id: 'col-down-dev-done', title: '[DOWN] Desenvolvimento Finalizado - Dependência', limit: 0, role: 'queue', policy: 'Desenvolvimento concluído, mas bloqueado/aguardando por dependências.\n\n• Métrica: WIP médio' },
-  { id: 'col-down-ready-test', title: '[DOWN] Ready to Teste', limit: 0, role: 'queue', policy: 'Pronto para iniciar os testes.' },
-  { id: 'col-down-testing', title: '[DOWN] Testando', limit: 2, role: 'active', policy: 'Fase ativa de Validação e Qualidade.' },
-  { id: 'col-down-ready-homolog', title: '[DOWN] Ready to Homologação', limit: 0, role: 'queue', policy: 'Testes de QA finalizados. Aguardando validação do negócio.' },
-  { id: 'col-down-val-po', title: '[DOWN] Em validação PO', limit: 2, role: 'active', policy: 'Homologação pelo Cliente/PO (User Acceptance Testing).' },
+  { id: 'col-down-dev', title: '[DOWN] Em Desenvolvimento', limit: 2, role: 'active', policy: 'Fase ativa de desenvolvimento.' },
+  { id: 'col-down-dev-done', title: '[DOWN] Desenvolvimento Finalizado - Dependência', limit: 2, role: 'queue', policy: 'Desenvolvimento concluído, mas bloqueado/aguardando por dependências.\n\n• Métrica: WIP médio' },
+  { id: 'col-down-ready-test', title: '[DOWN] Ready to Teste', limit: 2, role: 'queue', policy: 'Pronto para iniciar os testes.' },
+  { id: 'col-down-testing', title: '[DOWN] Testando', limit: 1, role: 'active', policy: 'Fase ativa de Validação e Qualidade.' },
+  { id: 'col-down-ready-homolog', title: '[DOWN] Ready to Homologação', limit: 2, role: 'queue', policy: 'Testes de QA finalizados. Aguardando validação do negócio.' },
+  { id: 'col-down-val-po', title: '[DOWN] Em validação PO', limit: 1, role: 'active', policy: 'Homologação pelo Cliente/PO (User Acceptance Testing).' },
   { id: 'col-down-homologado', title: '[DOWN] Homologado', limit: 0, role: 'queue', policy: 'Homologação concluída com sucesso.' },
   { id: 'col-down-ready-install', title: '[DOWN] Liberado para Instalar', limit: 0, role: 'queue', policy: 'Pronto para entrar na próxima janela de Release.' },
   { id: 'col-down-done', title: '[DOWN] Done', limit: 0, role: 'completed', policy: 'Ponto de Entrega (Delivery Point).\n\n• Métrica: Throughput\nO relógio de Cycle Time é interrompido.' }
