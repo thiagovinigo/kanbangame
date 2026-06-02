@@ -34,7 +34,7 @@ export const DailyModal = ({ isOpen, onClose }) => {
               <ArrowLeftRight size={20} color="var(--accent-emerald)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
                 <strong>1. Da Direita para a Esquerda</strong><br/>
-                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Comece pelos cartões mais próximos da conclusão (ex: UAT ou QA). A pergunta é: <em>"O que precisamos fazer HOJE para que este item seja entregue?"</em></span>
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Comece pelos cartões mais próximos da conclusão (ex: Homologação ou Teste). A pergunta é: <em>"O que precisamos fazer HOJE para que este item seja entregue?"</em></span>
               </div>
             </li>
 

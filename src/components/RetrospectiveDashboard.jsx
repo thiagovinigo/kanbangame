@@ -43,7 +43,7 @@ export const RetrospectiveDashboard = ({ isOpen, onClose }) => {
     let maxCount = -1;
     let maxColId = null;
     Object.keys(queueCounts).forEach(id => {
-      if (queueCounts[id] > maxCount && id !== 'col-deploy' && id !== 'col-backlog') {
+      if (queueCounts[id] > maxCount && id !== 'col-down-done' && id !== 'col-backlog') {
         maxCount = queueCounts[id];
         maxColId = id;
       }

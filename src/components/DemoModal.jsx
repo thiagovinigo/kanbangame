@@ -9,8 +9,8 @@ export const DemoModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   // Find cards in deploy column that haven't been validated yet
-  const deployedCards = cards.filter(c => c.columnId === 'col-deploy' && !c.customerValidated);
-  const validatedCards = cards.filter(c => c.columnId === 'col-deploy' && c.customerValidated);
+  const deployedCards = cards.filter(c => c.columnId === 'col-down-done' && !c.customerValidated);
+  const validatedCards = cards.filter(c => c.columnId === 'col-down-done' && c.customerValidated);
 
   const handleSimulate = () => {
     const result = simulateCustomerFeedback();

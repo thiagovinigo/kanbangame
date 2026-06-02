@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState } from 'react';
 import { initialColumns, initialCards } from '../utils/initialState';
 
 const GameContext = createContext();
@@ -15,9 +16,9 @@ export const GameProvider = ({ children }) => {
   const [feedback, setFeedback] = useState(null);
   const [dailyStep, setDailyStep] = useState(null);
 
-  const startDaily = () => setDailyStep(7); // Start at UAT Done (index 7)
-  const nextDailyStep = () => setDailyStep(prev => (prev !== null && prev > 1) ? prev - 1 : null);
-  const prevDailyStep = () => setDailyStep(prev => (prev !== null && prev < 7) ? prev + 1 : prev);
+  const startDaily = () => setDailyStep(13); // Start at Liberado para Instalar (index 13)
+  const nextDailyStep = () => setDailyStep(prev => (prev !== null && prev > 5) ? prev - 1 : null);
+  const prevDailyStep = () => setDailyStep(prev => (prev !== null && prev < 13) ? prev + 1 : prev);
   const stopDaily = () => setDailyStep(null);
 
   const showFeedback = (title, message, type = 'error') => {
@@ -109,24 +110,24 @@ export const GameProvider = ({ children }) => {
       }
     }
 
-    // Rule 2: Effort completion
+    // Rule 2: Effort completion (Definition of Done)
     const colIndex = columns.findIndex(c => c.id === toColumnId);
-    const devDoneIndex = columns.findIndex(c => c.id === 'col-dev-done');
-    const qaDoneIndex = columns.findIndex(c => c.id === 'col-qa-done');
-    const uatDoneIndex = columns.findIndex(c => c.id === 'col-uat-done');
     
-    if (colIndex >= devDoneIndex && card.effortLeft.dev > 0) {
-      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão para a próxima etapa!', 'error');
+    // DEV effort required before entering 'Desenvolvimento Finalizado' or beyond
+    if (colIndex >= 7 && card.effortLeft.dev > 0) {
+      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!', 'error');
       return;
     }
 
-    if (colIndex >= qaDoneIndex && card.effortLeft.test > 0) {
-      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão para a próxima etapa!', 'error');
+    // TEST effort required before entering 'Ready to Homologação' or beyond
+    if (colIndex >= 10 && card.effortLeft.test > 0) {
+      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!', 'error');
       return;
     }
 
-    if (colIndex >= uatDoneIndex && card.effortLeft.uat > 0) {
-      showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão para a próxima etapa!', 'error');
+    // UAT effort required before entering 'Homologado' or beyond
+    if (colIndex >= 12 && card.effortLeft.uat > 0) {
+      showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão!', 'error');
       return;
     }
 
@@ -135,10 +136,11 @@ export const GameProvider = ({ children }) => {
         let updates = { columnId: toColumnId };
         
         // Track Start and Complete time for Lead Time metrics
-        if (!c.startedAt && toColumnId !== 'col-backlog' && toColumnId !== 'col-selected') {
+        // Lead Time starts when entering the downstream commitment point (index 5)
+        if (!c.startedAt && colIndex >= 5) {
           updates.startedAt = turn;
         }
-        if (toColumnId === 'col-deploy' && !c.completedAt) {
+        if (toColumnId === 'col-down-done' && !c.completedAt) {
           updates.completedAt = turn;
         }
         
@@ -178,8 +180,8 @@ export const GameProvider = ({ children }) => {
 
   const blockRandomCard = () => {
     const activeCards = cards.filter(c => 
-      c.columnId !== 'col-backlog' && 
-      c.columnId !== 'col-deploy' && 
+      c.columnId.startsWith('col-down-') && 
+      c.columnId !== 'col-down-done' && 
       !c.isBlocked
     );
 
@@ -210,7 +212,7 @@ export const GameProvider = ({ children }) => {
 
     setCards(prevCards => {
       return prevCards.map(c => {
-        if (c.columnId === 'col-deploy' && !c.customerValidated) {
+        if (c.columnId === 'col-down-done' && !c.customerValidated) {
           // 20% chance of rejection
           const isRejected = Math.random() < 0.2;
           
@@ -220,7 +222,7 @@ export const GameProvider = ({ children }) => {
             // Send back to backlog and mark as a bug/rework
             return { 
               ...c, 
-              columnId: 'col-backlog', 
+              columnId: 'col-up-new', 
               startedAt: null,
               completedAt: null,
               title: `[RETRABALHO] ${c.title}`,

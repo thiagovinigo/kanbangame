@@ -41,8 +41,8 @@ export const Board = ({ onOpenPolicy }) => {
     }
   };
 
-  const upstreamCols = columns.filter(c => c.id === 'col-backlog' || c.id === 'col-selected');
-  const downstreamCols = columns.filter(c => c.id !== 'col-backlog' && c.id !== 'col-selected');
+  const upstreamCols = columns.filter(c => c.id.startsWith('col-up-'));
+  const downstreamCols = columns.filter(c => c.id.startsWith('col-down-'));
 
   return (
     <div className="board-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', overflowX: 'auto', paddingBottom: '20px' }}>

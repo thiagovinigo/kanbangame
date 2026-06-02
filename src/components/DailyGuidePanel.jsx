@@ -15,7 +15,7 @@ export const DailyGuidePanel = () => {
   let hintText = "";
   let icon = <Users size={20} color="var(--accent-blue)" />;
 
-  if (currentColumn.id === 'col-selected') {
+  if (currentColumn.id === 'col-down-ready-dev') {
     questionText = "Temos vagas de WIP no fluxo? Os devs estão ociosos?";
     hintText = "Olhe para a próxima etapa (DEV). Se houver espaço e ociosidade, o próximo cartão do topo deve ser puxado hoje. Alguém tem dúvida sobre o requisito?";
     icon = <ArrowRight size={20} color="var(--accent-emerald)" />;
@@ -56,7 +56,7 @@ export const DailyGuidePanel = () => {
           </div>
           <div>
             <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>Foco: {currentColumn.title}</h3>
-            <span style={{ fontSize: '0.85rem', color: 'var(--accent-blue)', fontWeight: 'bold' }}>Walk the Board (Passo {7 - dailyStep + 1} de 7)</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--accent-blue)', fontWeight: 'bold' }}>Walk the Board (Passo {13 - dailyStep + 1} de 9)</span>
           </div>
         </div>
         
@@ -74,8 +74,8 @@ export const DailyGuidePanel = () => {
         <button 
           className="btn btn-secondary" 
           onClick={prevDailyStep}
-          disabled={dailyStep >= 7}
-          style={{ opacity: dailyStep >= 7 ? 0.5 : 1 }}
+          disabled={dailyStep >= 13}
+          style={{ opacity: dailyStep >= 13 ? 0.5 : 1 }}
         >
           <ArrowRight size={16} /> Ir para a Direita
         </button>
@@ -83,8 +83,8 @@ export const DailyGuidePanel = () => {
         <button 
           className="btn btn-primary" 
           onClick={nextDailyStep}
-          disabled={dailyStep <= 1}
-          style={{ background: 'var(--accent-blue)', opacity: dailyStep <= 1 ? 0.5 : 1 }}
+          disabled={dailyStep <= 5}
+          style={{ background: 'var(--accent-blue)', opacity: dailyStep <= 5 ? 0.5 : 1 }}
         >
           Próxima Coluna à Esquerda <ArrowLeft size={16} />
         </button>
