@@ -178,6 +178,29 @@ export const GameProvider = ({ children }) => {
     });
   };
 
+  const cheatAdvanceCardsToDone = () => {
+    setCards(prevCards => {
+      let updatedCards = [...prevCards];
+      const testCards = updatedCards.filter(c => c.columnId === 'col-down-ready-test');
+      testCards.forEach(tc => {
+        const index = updatedCards.findIndex(c => c.id === tc.id);
+        updatedCards[index] = {
+          ...updatedCards[index],
+          columnId: 'col-down-done',
+          effortLeft: { dev: 0, test: 0, uat: 0 },
+          completedAt: turn
+        };
+      });
+      return updatedCards;
+    });
+  };
+
+  const forceCompleteEffort = (cardId) => {
+    setCards(prevCards => prevCards.map(c => 
+      c.id === cardId ? { ...c, effortLeft: { dev: 0, test: 0, uat: 0 } } : c
+    ));
+  };
+
   const blockRandomCard = () => {
     const activeCards = cards.filter(c => 
       c.columnId.startsWith('col-down-') && 
@@ -261,6 +284,8 @@ export const GameProvider = ({ children }) => {
     nextTurn,
     moveCard,
     applyEffort,
+    forceCompleteEffort,
+    cheatAdvanceCardsToDone,
     resetGame,
     blockRandomCard,
     unblockCard,

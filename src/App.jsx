@@ -11,7 +11,9 @@ import { DailyModal } from './components/DailyModal';
 import { DailyGuidePanel } from './components/DailyGuidePanel';
 import { RetrospectiveDashboard } from './components/RetrospectiveDashboard';
 import { DemoModal } from './components/DemoModal';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation } from 'lucide-react';
+import { NarratorOverlay } from './components/NarratorOverlay';
+import { useAutoSimulation } from './hooks/useAutoSimulation';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -21,6 +23,13 @@ function AppContent() {
   const [isDailyOpen, setIsDailyOpen] = useState(false);
   const [isRetroOpen, setIsRetroOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
+
+  const simulation = useAutoSimulation({
+    setIsReplenishmentOpen,
+    setIsDailyOpen,
+    setIsDemoOpen,
+    setIsRetroOpen
+  });
 
   return (
     <div className="app-container">
@@ -35,6 +44,16 @@ function AppContent() {
           </div>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            className="btn btn-primary" 
+            onClick={simulation.startSimulation} 
+            disabled={simulation.isActive}
+            title="Iniciar Tutorial/Simulação Guiada" 
+            style={{ background: 'var(--accent-purple)', borderColor: 'var(--accent-purple)', color: 'white' }}
+          >
+            <PlayCircle size={18} />
+            Auto-Simulação
+          </button>
           <button className="btn btn-secondary" onClick={() => setIsDemoOpen(true)} title="Fazer Reunião de Demonstração (Review)" style={{ borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)' }}>
             <Presentation size={18} />
             Demo
@@ -71,6 +90,15 @@ function AppContent() {
       <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <FeedbackModal />
+      {simulation.isActive && (
+        <NarratorOverlay 
+          message={simulation.message}
+          stepIndex={simulation.stepIndex}
+          totalSteps={simulation.totalSteps}
+          onNext={simulation.nextStep}
+          onSkip={simulation.stopSimulation}
+        />
+      )}
     </div>
   );
 }
