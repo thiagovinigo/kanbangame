@@ -82,72 +82,73 @@ export const GameProvider = ({ children }) => {
   // Removed rollDice function
 
   const moveCard = (cardId, toColumnId) => {
-    const card = cards.find(c => c.id === cardId);
-    if (!card || card.columnId === toColumnId) return;
+    setCards(prevCards => {
+      const card = prevCards.find(c => c.id === cardId);
+      if (!card || card.columnId === toColumnId) return prevCards;
 
-    if (card.isBlocked) {
-      showFeedback(
-        '🛑 Cartão Impedido!', 
-        'Você não pode mover um cartão bloqueado. Pela regra do Kanban, ele deve continuar onde está e consumir o Limite de WIP para gerar "dor" no time. Façam um Swarming para resolver o impedimento antes de continuar!', 
-        'error'
-      );
-      return;
-    }
-
-    const targetColumn = columns.find(c => c.id === toColumnId);
-    if (!targetColumn) return;
-
-    // Rule 1: WIP Limit (Expedite ignores this)
-    if (targetColumn.limit > 0 && card.type !== 'urgente') {
-      const cardsInTarget = cards.filter(c => c.columnId === toColumnId).length;
-      if (cardsInTarget >= targetColumn.limit) {
+      if (card.isBlocked) {
         showFeedback(
-          '⚠️ Pare de começar e comece a terminar!',
-          `Puxar este cartão violaria a capacidade máxima da coluna "${targetColumn.title}" (WIP Limit: ${targetColumn.limit}).\n\nNo Kanban, limitamos o Trabalho em Progresso para criar um Sistema Puxado. Ajude seus colegas a terminar o que já está na coluna em vez de puxar coisas novas!`,
-          'warning'
+          '🛑 Cartão Impedido!', 
+          'Você não pode mover um cartão bloqueado. Pela regra do Kanban, ele deve continuar onde está e consumir o Limite de WIP para gerar "dor" no time. Façam um Swarming para resolver o impedimento antes de continuar!', 
+          'error'
         );
-        return;
+        return prevCards;
       }
-    }
 
-    // Rule 2: Effort completion (Definition of Done)
-    const colIndex = columns.findIndex(c => c.id === toColumnId);
-    
-    // DEV effort required before entering 'Desenvolvimento Finalizado' or beyond
-    if (colIndex >= 7 && card.effortLeft.dev > 0) {
-      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!', 'error');
-      return;
-    }
+      const targetColumn = columns.find(c => c.id === toColumnId);
+      if (!targetColumn) return prevCards;
 
-    // TEST effort required before entering 'Ready to Homologação' or beyond
-    if (colIndex >= 10 && card.effortLeft.test > 0) {
-      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!', 'error');
-      return;
-    }
-
-    // UAT effort required before entering 'Homologado' or beyond
-    if (colIndex >= 12 && card.effortLeft.uat > 0) {
-      showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão!', 'error');
-      return;
-    }
-
-    setCards(prev => prev.map(c => {
-      if (c.id === cardId) {
-        let updates = { columnId: toColumnId };
-        
-        // Track Start and Complete time for Lead Time metrics
-        // Lead Time starts when entering the downstream commitment point (index 5)
-        if (!c.startedAt && colIndex >= 5) {
-          updates.startedAt = turn;
+      // Rule 1: WIP Limit (Expedite ignores this)
+      if (targetColumn.limit > 0 && card.type !== 'urgente') {
+        const cardsInTarget = prevCards.filter(c => c.columnId === toColumnId).length;
+        if (cardsInTarget >= targetColumn.limit) {
+          showFeedback(
+            '⚠️ Pare de começar e comece a terminar!',
+            `Puxar este cartão violaria a capacidade máxima da coluna "${targetColumn.title}" (WIP Limit: ${targetColumn.limit}).\n\nNo Kanban, limitamos o Trabalho em Progresso para criar um Sistema Puxado. Ajude seus colegas a terminar o que já está na coluna em vez de puxar coisas novas!`,
+            'warning'
+          );
+          return prevCards;
         }
-        if (toColumnId === 'col-down-done' && !c.completedAt) {
-          updates.completedAt = turn;
-        }
-        
-        return { ...c, ...updates };
       }
-      return c;
-    }));
+
+      // Rule 2: Effort completion (Definition of Done)
+      const colIndex = columns.findIndex(c => c.id === toColumnId);
+      
+      // DEV effort required before entering 'Desenvolvimento Finalizado' or beyond
+      if (colIndex >= 7 && card.effortLeft.dev > 0) {
+        showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!', 'error');
+        return prevCards;
+      }
+
+      // TEST effort required before entering 'Ready to Homologação' or beyond
+      if (colIndex >= 10 && card.effortLeft.test > 0) {
+        showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!', 'error');
+        return prevCards;
+      }
+
+      // UAT effort required before entering 'Homologado' or beyond
+      if (colIndex >= 12 && card.effortLeft.uat > 0) {
+        showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão!', 'error');
+        return prevCards;
+      }
+
+      return prevCards.map(c => {
+        if (c.id === cardId) {
+          let updates = { columnId: toColumnId };
+          
+          // Track Start and Complete time for Lead Time metrics
+          if (!c.startedAt && colIndex >= 5) {
+            updates.startedAt = turn;
+          }
+          if (toColumnId === 'col-down-done' && !c.completedAt) {
+            updates.completedAt = turn;
+          }
+          
+          return { ...c, ...updates };
+        }
+        return c;
+      });
+    });
   };
 
   const applyEffort = (cardId, effortType, amount = 1) => {
@@ -193,6 +194,55 @@ export const GameProvider = ({ children }) => {
       });
       return updatedCards;
     });
+  };
+
+  const autoPlayTurn = () => {
+    setCards(prevCards => {
+      let newCards = [...prevCards];
+      
+      // Auto-apply DEV
+      let devCap = teamConfig.dev * 8;
+      const devCards = newCards.filter(c => c.columnId === 'col-down-dev' && !c.isBlocked);
+      devCards.forEach(c => {
+        const index = newCards.findIndex(x => x.id === c.id);
+        const needed = newCards[index].effortLeft.dev;
+        const applied = Math.min(devCap, needed);
+        if (applied > 0) {
+          newCards[index] = { ...newCards[index], effortLeft: { ...newCards[index].effortLeft, dev: needed - applied } };
+          devCap -= applied;
+        }
+      });
+
+      // Auto-apply TEST
+      let testCap = teamConfig.test * 8;
+      const testCards = newCards.filter(c => c.columnId === 'col-down-testing' && !c.isBlocked);
+      testCards.forEach(c => {
+        const index = newCards.findIndex(x => x.id === c.id);
+        const needed = newCards[index].effortLeft.test;
+        const applied = Math.min(testCap, needed);
+        if (applied > 0) {
+          newCards[index] = { ...newCards[index], effortLeft: { ...newCards[index].effortLeft, test: needed - applied } };
+          testCap -= applied;
+        }
+      });
+
+      // Auto-apply UAT
+      let uatCap = teamConfig.uat * 8;
+      const uatCards = newCards.filter(c => c.columnId === 'col-down-val-po' && !c.isBlocked);
+      uatCards.forEach(c => {
+        const index = newCards.findIndex(x => x.id === c.id);
+        const needed = newCards[index].effortLeft.uat;
+        const applied = Math.min(uatCap, needed);
+        if (applied > 0) {
+          newCards[index] = { ...newCards[index], effortLeft: { ...newCards[index].effortLeft, uat: needed - applied } };
+          uatCap -= applied;
+        }
+      });
+
+      return newCards;
+    });
+
+    nextTurn();
   };
 
   const forceCompleteEffort = (cardId) => {
@@ -284,6 +334,7 @@ export const GameProvider = ({ children }) => {
     nextTurn,
     moveCard,
     applyEffort,
+    autoPlayTurn,
     forceCompleteEffort,
     cheatAdvanceCardsToDone,
     resetGame,

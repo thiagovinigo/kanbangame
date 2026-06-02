@@ -7,7 +7,7 @@ export const useAutoSimulation = ({
   setIsDemoOpen,
   setIsRetroOpen
 }) => {
-  const { cards, moveCard, applyEffort, forceCompleteEffort, cheatAdvanceCardsToDone, nextTurn, blockRandomCard, unblockCard, startDaily, stopDaily } = useGame();
+  const { cards, moveCard, applyEffort, autoPlayTurn, forceCompleteEffort, cheatAdvanceCardsToDone, nextTurn, blockRandomCard, unblockCard, startDaily, stopDaily } = useGame();
   
   const [isActive, setIsActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -38,15 +38,19 @@ export const useAutoSimulation = ({
       }
     },
     {
-      msg: "Trabalhando... (O tempo passa, os Devs reduzem o esforço necessário nos cartões para zero).",
+      msg: "Dia 1 de trabalho! As horas estão sendo consumidas automaticamente. Repare nas barras de esforço dos cartões (elas diminuem!).",
       action: () => {
-        const activeDev = cards.filter(c => c.columnId === 'col-down-dev');
-        activeDev.forEach(c => forceCompleteEffort(c.id));
-        nextTurn();
+        autoPlayTurn();
       }
     },
     {
-      msg: "Fim do primeiro dia! As tarefas avançaram, mas ops... um servidor caiu e gerou um impedimento crítico em um dos cartões!",
+      msg: "Dia 2. O time continua trabalhando no fluxo...",
+      action: () => {
+        autoPlayTurn();
+      }
+    },
+    {
+      msg: "No meio do fluxo, ops... um servidor caiu e gerou um impedimento crítico em um dos cartões!",
       action: () => {
         blockRandomCard();
       }
