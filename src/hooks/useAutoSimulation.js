@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { useKanbanQuiz } from './useKanbanQuiz';
 
 export const useAutoSimulation = ({
   setIsReplenishmentOpen,
@@ -8,19 +9,49 @@ export const useAutoSimulation = ({
   setIsRetroOpen
 }) => {
   const { cards, columns, capacity, moveCard, applyEffort, nextTurn, blockRandomCard, unblockCard } = useGame();
+  const { generateQuiz } = useKanbanQuiz();
   
   const [isActive, setIsActive] = useState(false);
   const [message, setMessage] = useState('');
+  const [isEndOfDay, setIsEndOfDay] = useState(false);
+  const [currentQuiz, setCurrentQuiz] = useState(null);
 
   const startSimulation = () => {
     setIsActive(true);
+    setIsEndOfDay(false);
+    setCurrentQuiz(null);
     setMessage("Bem-vindo à simulação dinâmica! O motor Kanban analisará o quadro e tomará a próxima decisão lógica (Puxar, Trabalhar, ou Avançar Fila). Clique em 'Avançar Simulação' para observar o time trabalhando.");
+  };
+
+  const handleStartQuiz = (type) => {
+    const quiz = generateQuiz(type, cards, columns);
+    setCurrentQuiz({ ...quiz, showFeedback: false });
+  };
+
+  const handleAnswerQuiz = (option) => {
+    if (!currentQuiz) return;
+    setCurrentQuiz({
+      ...currentQuiz,
+      showFeedback: true,
+      isCorrect: option.isCorrect,
+      feedbackMsg: option.feedback
+    });
+  };
+
+  const handleNext = (clearQuiz = false) => {
+    if (clearQuiz === true && currentQuiz && currentQuiz.isCorrect) {
+      setCurrentQuiz(null);
+      setIsEndOfDay(false);
+      return;
+    }
+    nextStep();
   };
 
   const nextStep = () => {
     if (!isActive) return;
+    setIsEndOfDay(false);
 
-    // 1. Tentar desbloquear impedimentos (Swarming - Maior Prioridade no Kanban)
+    // 1. Tentar desbloquear impedimentos
     const blockedCard = cards.find(c => c.isBlocked);
     if (blockedCard) {
       unblockCard(blockedCard.id);
@@ -28,7 +59,7 @@ export const useAutoSimulation = ({
       return;
     }
 
-    // 2. Tentar EMPURRAR (Avançar) cartões que já terminaram o esforço na coluna atual
+    // 2. Tentar EMPURRAR
     const doneUat = cards.find(c => c.columnId === 'col-down-val-po' && c.effortLeft.uat === 0);
     if (doneUat) {
       moveCard(doneUat.id, 'col-down-homologado');
@@ -50,7 +81,6 @@ export const useAutoSimulation = ({
       return;
     }
 
-    // Push from dev-done to ready-test (since dev-done is an intermediate buffer)
     const inDevDone = cards.find(c => c.columnId === 'col-down-dev-done');
     if (inDevDone) {
       const targetCol = columns.find(c => c.id === 'col-down-ready-test');
@@ -62,8 +92,7 @@ export const useAutoSimulation = ({
       }
     }
 
-    // 3. Tentar PUXAR (Sistemas Puxados - Trabalhadores Ociosos puxam das filas anteriores)
-    // UAT Pull
+    // 3. Tentar PUXAR
     const valPoCount = cards.filter(c => c.columnId === 'col-down-val-po').length;
     if (valPoCount < 1) {
       const readyHomolog = cards.find(c => c.columnId === 'col-down-ready-homolog');
@@ -74,7 +103,6 @@ export const useAutoSimulation = ({
       }
     }
 
-    // QA Pull
     const qaCount = cards.filter(c => c.columnId === 'col-down-testing').length;
     if (qaCount < 1) {
       const readyTest = cards.find(c => c.columnId === 'col-down-ready-test');
@@ -85,7 +113,6 @@ export const useAutoSimulation = ({
       }
     }
 
-    // Dev Pull
     const devCount = cards.filter(c => c.columnId === 'col-down-dev').length;
     if (devCount < 2) {
       const readyDev = cards.find(c => c.columnId === 'col-down-ready-dev');
@@ -96,7 +123,7 @@ export const useAutoSimulation = ({
       }
     }
 
-    // 4. Tentar PUXAR do UPSTREAM (Replenishment)
+    // 4. Tentar PUXAR do UPSTREAM
     const commitCount = cards.filter(c => c.columnId === 'col-down-ready-dev').length;
     if (commitCount < 3) {
       const readyUpstream = cards.find(c => c.columnId === 'col-up-ready');
@@ -105,7 +132,6 @@ export const useAutoSimulation = ({
         setMessage(`🔄 REPLENISHMENT: A fila de Dev esvaziou! O PO abasteceu o Ponto de Comprometimento puxando '${readyUpstream.title}' do Upstream.`);
         return;
       } else {
-        // Refinamento do Upstream
         const upNew = cards.find(c => c.columnId === 'col-up-new');
         if (upNew) {
           moveCard(upNew.id, 'col-up-ref-funcional');
@@ -118,7 +144,7 @@ export const useAutoSimulation = ({
       }
     }
 
-    // 5. Aplicar Esforço (Se ninguém puxou nem empurrou, estão trabalhando nos cartões ativos)
+    // 5. Aplicar Esforço
     let effortApplied = false;
     let msgs = [];
     
@@ -144,7 +170,6 @@ export const useAutoSimulation = ({
 
     const devActive = cards.filter(c => c.columnId === 'col-down-dev');
     if (devActive.length > 0 && capacity.dev > 0) {
-      // Distribui esforço se houver 2 cartões
       for (let c of devActive) {
          if (capacity.dev <= 0) break;
          const amount = Math.min(capacity.dev, c.effortLeft.dev, 8);
@@ -158,8 +183,6 @@ export const useAutoSimulation = ({
 
     if (effortApplied) {
       setMessage(`⏳ TRABALHANDO: O tempo está passando e a equipe está alocando esforço nas tarefas...\n👉 ${msgs.join(' | ')}`);
-      
-      // Chance aleatória de impedimento durante o trabalho
       if (Math.random() > 0.85) {
         blockRandomCard();
         setMessage(`⚠️ TRABALHO E IMPEDIMENTO! A equipe aplicou esforço, MAS um servidor caiu e bloqueou um cartão ativo! A próxima ação deve ser um Swarming.`);
@@ -167,27 +190,35 @@ export const useAutoSimulation = ({
       return;
     }
 
-    // 6. Se nada aconteceu, o dia acabou (sem capacidade ou sem trabalho)
+    // 6. Fim do dia
     const totalDone = cards.filter(c => c.columnId === 'col-down-done').length;
     if (totalDone === cards.length) {
-      setMessage(`🎉 SIMULAÇÃO CONCLUÍDA! Todos os cartões chegaram em Produção. Pressione Parar Simulação e abra a Retrospectiva (SDR) para ver as métricas.`);
+      setMessage(`🎉 SIMULAÇÃO CONCLUÍDA! Todos os cartões chegaram em Produção.`);
+      setIsEndOfDay(true);
       return;
     }
 
     nextTurn();
-    setMessage(`🌙 FIM DO DIA! A capacidade diária da equipe esgotou ou todos ficaram ociosos por falta de trabalho. O relógio avançou para renovar a energia!`);
+    setMessage(`🌙 FIM DO DIA! A capacidade diária esgotou ou todos ficaram ociosos. Aproveite o fim do dia para rodar as Cerimônias e testar seu conhecimento!`);
+    setIsEndOfDay(true);
   };
 
   const stopSimulation = () => {
     setIsActive(false);
     setMessage('');
+    setIsEndOfDay(false);
+    setCurrentQuiz(null);
   };
 
   return {
     isActive,
     message,
+    isEndOfDay,
+    currentQuiz,
     startSimulation,
-    nextStep,
-    stopSimulation
+    nextStep: handleNext,
+    stopSimulation,
+    handleStartQuiz,
+    handleAnswerQuiz
   };
 };

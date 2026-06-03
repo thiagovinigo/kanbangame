@@ -93,6 +93,10 @@ function AppContent() {
       {simulation.isActive && (
         <NarratorOverlay 
           message={simulation.message}
+          isEndOfDay={simulation.isEndOfDay}
+          currentQuiz={simulation.currentQuiz}
+          onStartQuiz={simulation.handleStartQuiz}
+          onAnswerQuiz={simulation.handleAnswerQuiz}
           onNext={simulation.nextStep}
           onSkip={simulation.stopSimulation}
         />
