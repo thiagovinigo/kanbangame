@@ -200,7 +200,39 @@ export const GameProvider = ({ children }) => {
     setCards(prevCards => {
       let newCards = [...prevCards];
       
-      // Auto-apply DEV
+      const tryAdvance = (cardIndex, targetColumnId) => {
+        const targetColumn = columns.find(c => c.id === targetColumnId);
+        if (targetColumn && targetColumn.limit > 0) {
+          const cardsInTarget = newCards.filter(c => c.columnId === targetColumnId).length;
+          if (cardsInTarget >= targetColumn.limit) return; // Blocked by WIP limit
+        }
+        newCards[cardIndex] = { ...newCards[cardIndex], columnId: targetColumnId };
+      };
+
+      const tryPull = (sourceColumnId, targetColumnId) => {
+        const targetColumn = columns.find(c => c.id === targetColumnId);
+        if (!targetColumn) return;
+        let cardsInTarget = newCards.filter(c => c.columnId === targetColumnId).length;
+        const limit = targetColumn.limit > 0 ? targetColumn.limit : Infinity;
+        
+        if (cardsInTarget < limit) {
+          const candidates = newCards.filter(c => c.columnId === sourceColumnId && !c.isBlocked);
+          for (let c of candidates) {
+            if (cardsInTarget >= limit) break;
+            const index = newCards.findIndex(x => x.id === c.id);
+            newCards[index] = { ...newCards[index], columnId: targetColumnId };
+            cardsInTarget++;
+          }
+        }
+      };
+
+      // Pull phase
+      tryPull('col-down-ready-dev', 'col-down-dev');
+      tryPull('col-down-ready-test', 'col-down-testing');
+      tryPull('col-down-ready-homolog', 'col-down-val-po');
+      tryPull('col-down-homologado', 'col-down-ready-install');
+
+      // Effort phase
       let devCap = teamConfig.dev * 8;
       const devCards = newCards.filter(c => c.columnId === 'col-down-dev' && !c.isBlocked);
       devCards.forEach(c => {
@@ -211,9 +243,13 @@ export const GameProvider = ({ children }) => {
           newCards[index] = { ...newCards[index], effortLeft: { ...newCards[index].effortLeft, dev: needed - applied } };
           devCap -= applied;
         }
+        if (newCards[index].effortLeft.dev === 0) {
+          tryAdvance(index, 'col-down-dev-done');
+          // Also try to move it directly to ready-test if it's done with dev
+          tryAdvance(index, 'col-down-ready-test');
+        }
       });
 
-      // Auto-apply TEST
       let testCap = teamConfig.test * 8;
       const testCards = newCards.filter(c => c.columnId === 'col-down-testing' && !c.isBlocked);
       testCards.forEach(c => {
@@ -224,9 +260,11 @@ export const GameProvider = ({ children }) => {
           newCards[index] = { ...newCards[index], effortLeft: { ...newCards[index].effortLeft, test: needed - applied } };
           testCap -= applied;
         }
+        if (newCards[index].effortLeft.test === 0) {
+          tryAdvance(index, 'col-down-ready-homolog');
+        }
       });
 
-      // Auto-apply UAT
       let uatCap = teamConfig.uat * 8;
       const uatCards = newCards.filter(c => c.columnId === 'col-down-val-po' && !c.isBlocked);
       uatCards.forEach(c => {
@@ -236,6 +274,10 @@ export const GameProvider = ({ children }) => {
         if (applied > 0) {
           newCards[index] = { ...newCards[index], effortLeft: { ...newCards[index].effortLeft, uat: needed - applied } };
           uatCap -= applied;
+        }
+        if (newCards[index].effortLeft.uat === 0) {
+          tryAdvance(index, 'col-down-homologado');
+          tryAdvance(index, 'col-down-ready-install');
         }
       });
 
