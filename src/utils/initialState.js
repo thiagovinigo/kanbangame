@@ -2,23 +2,23 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const initialColumns = [
   // --- UPSTREAM ---
-  { id: 'col-up-new', title: '[UP] New', limit: 0, role: 'queue', policy: 'Ideias e requisitos brutos.\n\n• Métrica: Lead Time\n• Sem restrição de WIP.\n\n👉 Quem puxa: N/A\n👉 Quem empurra para a próxima fila: Stakeholders / Clientes' },
-  { id: 'col-up-ref-funcional', title: '[UP] Refinamento Funcional', limit: 0, role: 'queue', policy: 'Refinamento de negócio/funcional.\n\n• Métrica: WIP\n\n👉 Quem puxa: Product Owner (PO)\n👉 Quem empurra para a próxima fila: Product Owner (PO)' },
-  { id: 'col-up-ref-tecnico', title: '[UP] Refinamento Técnico', limit: 0, role: 'queue', policy: 'Refinamento técnico da solução.\n\n• Métrica: WIP, Tempo em Fila\n\n👉 Quem puxa: Tech Lead / Arquitetos\n👉 Quem empurra para a próxima fila: Tech Lead / Arquitetos' },
-  { id: 'col-up-aprovacao-po', title: '[UP] Aprovação PO', limit: 0, role: 'queue', policy: 'Validação e aprovação do PO antes do desenvolvimento.\n\n• Métrica: Throughput\n\n👉 Quem puxa: Product Owner (PO)\n👉 Quem empurra para a próxima fila: Product Owner (PO)' },
-  { id: 'col-up-ready', title: '[UP] Pronto para Replenishment', limit: 4, role: 'queue', policy: 'Ponto final do Upstream. Aguardando a Reunião de Replenishment.\n\n• Métrica: Lead Time\n\n👉 Quem puxa: Product Owner (PO)\n👉 Quem empurra para a próxima fila: PO (no Replenishment)' },
+  { id: 'col-up-new', title: '[UP] New', limit: 0, role: 'queue', policy: 'Ideias e requisitos brutos.\n\n• Métrica: Lead Time\n• Sem restrição de WIP.\n\n👉 Abastecida por: Stakeholders / Clientes\n👉 Puxada por: Product Owner (PO)' },
+  { id: 'col-up-ref-funcional', title: '[UP] Refinamento Funcional', limit: 0, role: 'queue', policy: 'Refinamento de negócio/funcional.\n\n• Métrica: WIP\n\n👉 Trabalhada por: Product Owner (PO)' },
+  { id: 'col-up-ref-tecnico', title: '[UP] Refinamento Técnico', limit: 0, role: 'queue', policy: 'Refinamento técnico da solução.\n\n• Métrica: WIP, Tempo em Fila\n\n👉 Trabalhada por: Tech Lead / Arquitetos' },
+  { id: 'col-up-aprovacao-po', title: '[UP] Aprovação PO', limit: 0, role: 'queue', policy: 'Validação e aprovação do PO antes do desenvolvimento.\n\n• Métrica: Throughput\n\n👉 Trabalhada por: Product Owner (PO)' },
+  { id: 'col-up-ready', title: '[UP] Pronto para Replenishment', limit: 4, role: 'queue', policy: 'Ponto final do Upstream. Aguardando a Reunião de Replenishment.\n\n• Métrica: Lead Time\n\n👉 Abastecida por: PO\n👉 Puxada por: Desenvolvedores (no Replenishment)' },
 
   // --- DOWNSTREAM ---
-  { id: 'col-down-ready-dev', title: '[DOWN] Pronto para Desenvolvimento', limit: 3, role: 'queue', policy: 'Ponto de Comprometimento (Commitment Point).\n\n• Métrica: WIP, Cycle Time\n\n👉 Quem puxa: N/A (abastecido pelo Replenishment)\n👉 Quem empurra (para DEV): Desenvolvedores' },
-  { id: 'col-down-dev', title: '[DOWN] Em Desenvolvimento', limit: 2, role: 'active', policy: 'Fase ativa de desenvolvimento.\n\n👉 Quem puxa: Desenvolvedores\n👉 Quem empurra para a próxima fila: Desenvolvedores' },
-  { id: 'col-down-dev-done', title: '[DOWN] Desenvolvimento Finalizado - Dependência', limit: 2, role: 'queue', policy: 'Desenvolvimento concluído, mas bloqueado/aguardando por dependências.\n\n• Métrica: WIP médio\n\n👉 Quem empurra para cá: Desenvolvedores\n👉 Quem puxa para o fluxo: QA' },
-  { id: 'col-down-ready-test', title: '[DOWN] Ready to Teste', limit: 2, role: 'queue', policy: 'Pronto para iniciar os testes.\n\n👉 Quem empurra para cá: Desenvolvedores\n👉 Quem puxa (para testes): Analistas de QA' },
-  { id: 'col-down-testing', title: '[DOWN] Testando', limit: 1, role: 'active', policy: 'Fase ativa de Validação e Qualidade.\n\n👉 Quem puxa: Analistas de QA\n👉 Quem empurra para a próxima fila: Analistas de QA' },
-  { id: 'col-down-ready-homolog', title: '[DOWN] Ready to Homologação', limit: 2, role: 'queue', policy: 'Testes de QA finalizados. Aguardando validação do negócio.\n\n👉 Quem empurra para cá: Analistas de QA\n👉 Quem puxa (para UAT): Product Owner (PO) / Cliente' },
-  { id: 'col-down-val-po', title: '[DOWN] Em validação PO', limit: 1, role: 'active', policy: 'Homologação pelo Cliente/PO (User Acceptance Testing).\n\n👉 Quem puxa: Product Owner (PO) / Cliente\n👉 Quem empurra para a próxima fila: Product Owner (PO) / Cliente' },
-  { id: 'col-down-homologado', title: '[DOWN] Homologado', limit: 0, role: 'queue', policy: 'Homologação concluída com sucesso.\n\n👉 Quem empurra para cá: Product Owner (PO)\n👉 Quem puxa (para deploy): DevOps / Release Manager' },
-  { id: 'col-down-ready-install', title: '[DOWN] Liberado para Instalar', limit: 0, role: 'queue', policy: 'Pronto para entrar na próxima janela de Release.\n\n👉 Quem empurra para cá: DevOps / Release Manager\n👉 Quem puxa para a Produção: Operações / Infraestrutura' },
-  { id: 'col-down-done', title: '[DOWN] Done', limit: 0, role: 'completed', policy: 'Ponto de Entrega (Delivery Point).\n\n• Métrica: Throughput\nO relógio de Cycle Time é interrompido.\n\n👉 Quem empurra para cá: Operações / Infraestrutura' }
+  { id: 'col-down-ready-dev', title: '[DOWN] Pronto para Desenvolvimento', limit: 3, role: 'queue', policy: 'Ponto de Comprometimento (Commitment Point).\n\n• Métrica: WIP, Cycle Time\n\n👉 Abastecida por: Reunião de Replenishment\n👉 Puxada por: Desenvolvedores' },
+  { id: 'col-down-dev', title: '[DOWN] Em Desenvolvimento', limit: 2, role: 'active', policy: 'Fase ativa de desenvolvimento.\n\n👉 Trabalhada por: Desenvolvedores' },
+  { id: 'col-down-dev-done', title: '[DOWN] Desenvolvimento Finalizado - Dependência', limit: 2, role: 'queue', policy: 'Desenvolvimento concluído, mas bloqueado/aguardando por dependências.\n\n• Métrica: WIP médio\n\n👉 Abastecida por: Desenvolvedores\n👉 Puxada por: QA' },
+  { id: 'col-down-ready-test', title: '[DOWN] Ready to Teste', limit: 2, role: 'queue', policy: 'Pronto para iniciar os testes.\n\n👉 Abastecida por: Desenvolvedores\n👉 Puxada por: Analistas de QA' },
+  { id: 'col-down-testing', title: '[DOWN] Testando', limit: 1, role: 'active', policy: 'Fase ativa de Validação e Qualidade.\n\n👉 Trabalhada por: Analistas de QA' },
+  { id: 'col-down-ready-homolog', title: '[DOWN] Ready to Homologação', limit: 2, role: 'queue', policy: 'Testes de QA finalizados. Aguardando validação do negócio.\n\n👉 Abastecida por: Analistas de QA\n👉 Puxada por: Product Owner (PO) / Cliente' },
+  { id: 'col-down-val-po', title: '[DOWN] Em validação PO', limit: 1, role: 'active', policy: 'Homologação pelo Cliente/PO (User Acceptance Testing).\n\n👉 Trabalhada por: Product Owner (PO) / Cliente' },
+  { id: 'col-down-homologado', title: '[DOWN] Homologado', limit: 0, role: 'queue', policy: 'Homologação concluída com sucesso.\n\n👉 Abastecida por: Product Owner (PO)\n👉 Puxada por: DevOps / Release Manager' },
+  { id: 'col-down-ready-install', title: '[DOWN] Liberado para Instalar', limit: 0, role: 'queue', policy: 'Pronto para entrar na próxima janela de Release.\n\n👉 Abastecida por: DevOps / Release Manager\n👉 Puxada por: Operações / Infraestrutura' },
+  { id: 'col-down-done', title: '[DOWN] Done', limit: 0, role: 'completed', policy: 'Ponto de Entrega (Delivery Point).\n\n• Métrica: Throughput\nO relógio de Cycle Time é interrompido.\n\n👉 Abastecida por: Operações / Infraestrutura' }
 ];
 
 export const initialCards = [
