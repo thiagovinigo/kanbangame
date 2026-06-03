@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useGame } from '../context/GameContext';
 
 export const useAutoSimulation = ({
@@ -7,135 +7,184 @@ export const useAutoSimulation = ({
   setIsDemoOpen,
   setIsRetroOpen
 }) => {
-  const { cards, moveCard, applyEffort, autoPlayTurn, forceCompleteEffort, cheatAdvanceCardsToDone, nextTurn, blockRandomCard, unblockCard, startDaily, stopDaily } = useGame();
+  const { cards, columns, capacity, moveCard, applyEffort, nextTurn, blockRandomCard, unblockCard } = useGame();
   
   const [isActive, setIsActive] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
   const [message, setMessage] = useState('');
-  
-  // Script sequence
-  const script = [
-    {
-      msg: "Bem-vindo à simulação guiada! O objetivo do Kanban é fazer o trabalho fluir da esquerda para a direita. Vamos começar fazendo um Replenishment (Reabastecimento) para puxar opções do Upstream para o time de entrega.",
-      action: () => {
-        setIsReplenishmentOpen(true);
-      }
-    },
-    {
-      msg: "O PO selecionou as opções mais prioritárias e as moveu para o Ponto de Comprometimento (Pronto para Desenvolvimento).",
-      action: () => {
-        setIsReplenishmentOpen(false);
-        // Move cards from col-up-ready to col-down-ready-dev
-        const readyCards = cards.filter(c => c.columnId === 'col-up-ready');
-        readyCards.slice(0, 3).forEach(c => moveCard(c.id, 'col-down-ready-dev'));
-      }
-    },
-    {
-      msg: "Agora os Desenvolvedores vão puxar essas tarefas para a coluna 'Em Desenvolvimento' (respeitando o limite de WIP de 2) e começar a trabalhar nelas. O relógio do Lead Time começou a contar!",
-      action: () => {
-        const devCards = cards.filter(c => c.columnId === 'col-down-ready-dev');
-        devCards.slice(0, 2).forEach(c => moveCard(c.id, 'col-down-dev'));
-      }
-    },
-    {
-      msg: "Dia 1 de trabalho! As horas estão sendo consumidas automaticamente. Repare nas barras de esforço dos cartões (elas diminuem!).",
-      action: () => {
-        autoPlayTurn();
-      }
-    },
-    {
-      msg: "Dia 2. O time continua trabalhando no fluxo...",
-      action: () => {
-        autoPlayTurn();
-      }
-    },
-    {
-      msg: "No meio do fluxo, ops... um servidor caiu e gerou um impedimento crítico em um dos cartões!",
-      action: () => {
-        blockRandomCard();
-      }
-    },
-    {
-      msg: "É hora da Reunião Diária (Kanban Meeting). O foco do time não é no que cada um fez, mas sim nos cartões bloqueados. Da direita para a esquerda!",
-      action: () => {
-        setIsDailyOpen(true);
-      }
-    },
-    {
-      msg: "Na Daily, o time decide fazer um 'Swarming' (Enxame). Todos param de puxar coisas novas e ajudam a remover o bloqueio juntos. Cartão desbloqueado e movido para testes!",
-      action: () => {
-        setIsDailyOpen(false);
-        stopDaily();
-        const blockedCard = cards.find(c => c.isBlocked);
-        if (blockedCard) unblockCard(blockedCard.id);
-        
-        const doneDev = cards.filter(c => c.columnId === 'col-down-dev');
-        doneDev.forEach(c => {
-          moveCard(c.id, 'col-down-dev-done');
-          moveCard(c.id, 'col-down-ready-test');
-        });
-      }
-    },
-    {
-      msg: "O trabalho fluiu rápido! O QA testou, o PO homologou, e as tarefas chegaram em Produção (Deploy). Vamos fazer a Reunião de Demonstração (Review) com os clientes.",
-      action: () => {
-        cheatAdvanceCardsToDone();
-        nextTurn();
-        setIsDemoOpen(true);
-      }
-    },
-    {
-      msg: "Os clientes adoraram! Para fechar o ciclo de feedback, vamos olhar para as nossas métricas de Fluxo na Retrospectiva (Service Delivery Review) para descobrir nosso gargalo e melhorar para a próxima semana.",
-      action: () => {
-        setIsDemoOpen(false);
-        setIsRetroOpen(true);
-      }
-    },
-    {
-      msg: "Fim da simulação! Você viu na prática como os cartões entram pelo Replenishment, são destravados na Daily e validados na Demo. Jogue manualmente agora para sentir os Limites de WIP na pele!",
-      action: () => {
-        setIsRetroOpen(false);
-      }
-    }
-  ];
-
-  const totalSteps = script.length;
 
   const startSimulation = () => {
     setIsActive(true);
-    setStepIndex(1);
-    setMessage(script[0].msg);
-    script[0].action();
+    setMessage("Bem-vindo à simulação dinâmica! O motor Kanban analisará o quadro e tomará a próxima decisão lógica (Puxar, Trabalhar, ou Avançar Fila). Clique em 'Avançar Simulação' para observar o time trabalhando.");
   };
 
   const nextStep = () => {
-    if (stepIndex >= totalSteps) {
-      stopSimulation();
+    if (!isActive) return;
+
+    // 1. Tentar desbloquear impedimentos (Swarming - Maior Prioridade no Kanban)
+    const blockedCard = cards.find(c => c.isBlocked);
+    if (blockedCard) {
+      unblockCard(blockedCard.id);
+      setMessage(`🔥 SWARMING: A equipe parou de puxar tarefas novas e fez um enxame para resolver o impedimento crítico do cartão '${blockedCard.title}'!`);
       return;
     }
+
+    // 2. Tentar EMPURRAR (Avançar) cartões que já terminaram o esforço na coluna atual
+    const doneUat = cards.find(c => c.columnId === 'col-down-val-po' && c.effortLeft.uat === 0);
+    if (doneUat) {
+      moveCard(doneUat.id, 'col-down-homologado');
+      setMessage(`✅ ENTREGA: O PO validou '${doneUat.title}'. O cartão foi movido para a fila de 'Homologado' e está pronto para Produção!`);
+      return;
+    }
+
+    const doneTest = cards.find(c => c.columnId === 'col-down-testing' && c.effortLeft.test === 0);
+    if (doneTest) {
+      moveCard(doneTest.id, 'col-down-ready-homolog');
+      setMessage(`🧪 QA: A equipe de Qualidade finalizou os testes do cartão '${doneTest.title}' e o empurrou para a fila 'Ready to Homologação'.`);
+      return;
+    }
+
+    const doneDev = cards.find(c => c.columnId === 'col-down-dev' && c.effortLeft.dev === 0);
+    if (doneDev) {
+      moveCard(doneDev.id, 'col-down-dev-done');
+      setMessage(`💻 DEV FINALIZADO: Os Desenvolvedores concluíram a codificação de '${doneDev.title}' e o empurraram para a fila de espera do QA.`);
+      return;
+    }
+
+    // Push from dev-done to ready-test (since dev-done is an intermediate buffer)
+    const inDevDone = cards.find(c => c.columnId === 'col-down-dev-done');
+    if (inDevDone) {
+      const targetCol = columns.find(c => c.id === 'col-down-ready-test');
+      const count = cards.filter(c => c.columnId === 'col-down-ready-test').length;
+      if (count < targetCol.limit) {
+        moveCard(inDevDone.id, 'col-down-ready-test');
+        setMessage(`📦 FLUXO: O cartão '${inDevDone.title}' foi repassado da fila de dependência para a fila oficial de Testes.`);
+        return;
+      }
+    }
+
+    // 3. Tentar PUXAR (Sistemas Puxados - Trabalhadores Ociosos puxam das filas anteriores)
+    // UAT Pull
+    const valPoCount = cards.filter(c => c.columnId === 'col-down-val-po').length;
+    if (valPoCount < 1) {
+      const readyHomolog = cards.find(c => c.columnId === 'col-down-ready-homolog');
+      if (readyHomolog) {
+        moveCard(readyHomolog.id, 'col-down-val-po');
+        setMessage(`📥 SISTEMA PUXADO (PULL): O PO estava ocioso e PUXOU o cartão '${readyHomolog.title}' da fila para iniciar a Homologação.`);
+        return;
+      }
+    }
+
+    // QA Pull
+    const qaCount = cards.filter(c => c.columnId === 'col-down-testing').length;
+    if (qaCount < 1) {
+      const readyTest = cards.find(c => c.columnId === 'col-down-ready-test');
+      if (readyTest) {
+        moveCard(readyTest.id, 'col-down-testing');
+        setMessage(`📥 SISTEMA PUXADO (PULL): A equipe de QA viu que havia vagas no seu WIP limit e PUXOU '${readyTest.title}' para Testar.`);
+        return;
+      }
+    }
+
+    // Dev Pull
+    const devCount = cards.filter(c => c.columnId === 'col-down-dev').length;
+    if (devCount < 2) {
+      const readyDev = cards.find(c => c.columnId === 'col-down-ready-dev');
+      if (readyDev) {
+        moveCard(readyDev.id, 'col-down-dev');
+        setMessage(`📥 SISTEMA PUXADO (PULL): Um Desenvolvedor ficou livre e PUXOU '${readyDev.title}' do Ponto de Comprometimento para começar a codificar.`);
+        return;
+      }
+    }
+
+    // 4. Tentar PUXAR do UPSTREAM (Replenishment)
+    const commitCount = cards.filter(c => c.columnId === 'col-down-ready-dev').length;
+    if (commitCount < 3) {
+      const readyUpstream = cards.find(c => c.columnId === 'col-up-ready');
+      if (readyUpstream) {
+        moveCard(readyUpstream.id, 'col-down-ready-dev');
+        setMessage(`🔄 REPLENISHMENT: A fila de Dev esvaziou! O PO abasteceu o Ponto de Comprometimento puxando '${readyUpstream.title}' do Upstream.`);
+        return;
+      } else {
+        // Refinamento do Upstream
+        const upNew = cards.find(c => c.columnId === 'col-up-new');
+        if (upNew) {
+          moveCard(upNew.id, 'col-up-ref-funcional');
+          moveCard(upNew.id, 'col-up-ref-tecnico');
+          moveCard(upNew.id, 'col-up-aprovacao-po');
+          moveCard(upNew.id, 'col-up-ready');
+          setMessage(`🧠 UPSTREAM: Uma nova ideia ('${upNew.title}') foi refinada pelo time de Negócios e está pronta para entrar no fluxo de Delivery!`);
+          return;
+        }
+      }
+    }
+
+    // 5. Aplicar Esforço (Se ninguém puxou nem empurrou, estão trabalhando nos cartões ativos)
+    let effortApplied = false;
+    let msgs = [];
     
-    // Using a setTimeout hack to ensure GameContext updates are fresh before the next action reads them
-    // but React batches. Ideally, the script actions that read 'cards' will read stale state if we aren't careful.
-    // We will execute the action, which sets states.
-    script[stepIndex].action();
-    setMessage(script[stepIndex].msg);
-    setStepIndex(stepIndex + 1);
+    const uatActive = cards.filter(c => c.columnId === 'col-down-val-po');
+    if (uatActive.length > 0 && capacity.uat > 0) {
+      const amount = Math.min(capacity.uat, uatActive[0].effortLeft.uat, 8);
+      if (amount > 0) {
+        applyEffort(uatActive[0].id, 'uat', amount);
+        msgs.push(`PO (${amount}h em '${uatActive[0].title.substring(0,10)}...')`);
+        effortApplied = true;
+      }
+    }
+
+    const qaActive = cards.filter(c => c.columnId === 'col-down-testing');
+    if (qaActive.length > 0 && capacity.test > 0) {
+      const amount = Math.min(capacity.test, qaActive[0].effortLeft.test, 8);
+      if (amount > 0) {
+        applyEffort(qaActive[0].id, 'test', amount);
+        msgs.push(`QA (${amount}h em '${qaActive[0].title.substring(0,10)}...')`);
+        effortApplied = true;
+      }
+    }
+
+    const devActive = cards.filter(c => c.columnId === 'col-down-dev');
+    if (devActive.length > 0 && capacity.dev > 0) {
+      // Distribui esforço se houver 2 cartões
+      for (let c of devActive) {
+         if (capacity.dev <= 0) break;
+         const amount = Math.min(capacity.dev, c.effortLeft.dev, 8);
+         if (amount > 0) {
+           applyEffort(c.id, 'dev', amount);
+           msgs.push(`DEV (${amount}h em '${c.title.substring(0,10)}...')`);
+           effortApplied = true;
+         }
+      }
+    }
+
+    if (effortApplied) {
+      setMessage(`⏳ TRABALHANDO: O tempo está passando e a equipe está alocando esforço nas tarefas...\n👉 ${msgs.join(' | ')}`);
+      
+      // Chance aleatória de impedimento durante o trabalho
+      if (Math.random() > 0.85) {
+        blockRandomCard();
+        setMessage(`⚠️ TRABALHO E IMPEDIMENTO! A equipe aplicou esforço, MAS um servidor caiu e bloqueou um cartão ativo! A próxima ação deve ser um Swarming.`);
+      }
+      return;
+    }
+
+    // 6. Se nada aconteceu, o dia acabou (sem capacidade ou sem trabalho)
+    const totalDone = cards.filter(c => c.columnId === 'col-down-done').length;
+    if (totalDone === cards.length) {
+      setMessage(`🎉 SIMULAÇÃO CONCLUÍDA! Todos os cartões chegaram em Produção. Pressione Parar Simulação e abra a Retrospectiva (SDR) para ver as métricas.`);
+      return;
+    }
+
+    nextTurn();
+    setMessage(`🌙 FIM DO DIA! A capacidade diária da equipe esgotou ou todos ficaram ociosos por falta de trabalho. O relógio avançou para renovar a energia!`);
   };
 
   const stopSimulation = () => {
     setIsActive(false);
-    setStepIndex(0);
     setMessage('');
-    setIsReplenishmentOpen(false);
-    setIsDailyOpen(false);
-    setIsDemoOpen(false);
-    setIsRetroOpen(false);
   };
 
   return {
     isActive,
-    stepIndex,
-    totalSteps,
     message,
     startSimulation,
     nextStep,

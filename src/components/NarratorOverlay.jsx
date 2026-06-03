@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bot, ChevronRight, X } from 'lucide-react';
 
-export const NarratorOverlay = ({ message, stepIndex, totalSteps, onNext, onSkip }) => {
+export const NarratorOverlay = ({ message, onNext, onSkip }) => {
   if (!message) return null;
 
   return (
@@ -34,7 +34,7 @@ export const NarratorOverlay = ({ message, stepIndex, totalSteps, onNext, onSkip
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Bot size={20} color="var(--accent-purple)" />
           <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '0.9rem', letterSpacing: '1px' }}>
-            GUIA DE SIMULAÇÃO ({stepIndex}/{totalSteps})
+            GUIA DE SIMULAÇÃO
           </h4>
         </div>
         <button onClick={onSkip} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }} title="Encerrar Simulação">

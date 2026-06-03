@@ -93,8 +93,6 @@ function AppContent() {
       {simulation.isActive && (
         <NarratorOverlay 
           message={simulation.message}
-          stepIndex={simulation.stepIndex}
-          totalSteps={simulation.totalSteps}
           onNext={simulation.nextStep}
           onSkip={simulation.stopSimulation}
         />
