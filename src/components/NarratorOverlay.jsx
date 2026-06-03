@@ -54,7 +54,7 @@ export const NarratorOverlay = ({ message, onNext, onSkip }) => {
           className="btn btn-primary"
           style={{ background: 'var(--accent-purple)', border: 'none', borderRadius: '20px', padding: '8px 24px' }}
         >
-          {stepIndex === totalSteps ? 'Finalizar' : 'Continuar'} <ChevronRight size={18} />
+          Avançar Simulação <ChevronRight size={18} />
         </button>
       </div>
 
