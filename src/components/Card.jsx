@@ -108,7 +108,7 @@ export const Card = ({ card }) => {
               {card.effortLeft.dev === 0 ? '✓' : `${card.effortLeft.dev}h / ${card.effortTotal.dev}h`}
             </span>
             <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
-              {card.effortLeft.dev > 0 && capacity.dev >= 8 && card.columnId === 'col-dev-doing' && (
+              {card.effortLeft.dev > 0 && capacity.dev >= 8 && card.columnId === 'col-down-dev' && (
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); applyEffort(card.id, 'dev', 8); }}
                   style={{ background: 'var(--accent-blue)', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
@@ -116,7 +116,7 @@ export const Card = ({ card }) => {
                   +8h
                 </button>
               )}
-              {card.effortLeft.dev > 0 && capacity.dev >= 1 && card.columnId === 'col-dev-doing' && (
+              {card.effortLeft.dev > 0 && capacity.dev >= 1 && card.columnId === 'col-down-dev' && (
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); applyEffort(card.id, 'dev', 1); }}
                   style={{ background: 'transparent', color: 'var(--accent-blue)', border: '1px solid var(--accent-blue)', borderRadius: '4px', padding: '2px 4px', cursor: 'pointer', fontSize: '10px' }}
@@ -144,7 +144,7 @@ export const Card = ({ card }) => {
               {card.effortLeft.test === 0 ? '✓' : `${card.effortLeft.test}h / ${card.effortTotal.test}h`}
             </span>
             <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
-              {card.effortLeft.test > 0 && capacity.test >= 8 && card.columnId === 'col-qa-doing' && (
+              {card.effortLeft.test > 0 && capacity.test >= 8 && card.columnId === 'col-down-testing' && (
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); applyEffort(card.id, 'test', 8); }}
                   style={{ background: 'var(--accent-purple)', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
@@ -152,7 +152,7 @@ export const Card = ({ card }) => {
                   +8h
                 </button>
               )}
-              {card.effortLeft.test > 0 && capacity.test >= 1 && card.columnId === 'col-qa-doing' && (
+              {card.effortLeft.test > 0 && capacity.test >= 1 && card.columnId === 'col-down-testing' && (
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); applyEffort(card.id, 'test', 1); }}
                   style={{ background: 'transparent', color: 'var(--accent-purple)', border: '1px solid var(--accent-purple)', borderRadius: '4px', padding: '2px 4px', cursor: 'pointer', fontSize: '10px' }}
@@ -180,7 +180,7 @@ export const Card = ({ card }) => {
               {card.effortLeft.uat === 0 ? '✓' : `${card.effortLeft.uat}h / ${card.effortTotal.uat}h`}
             </span>
             <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
-              {card.effortLeft.uat > 0 && capacity.uat >= 8 && card.columnId === 'col-uat-doing' && (
+              {card.effortLeft.uat > 0 && capacity.uat >= 8 && card.columnId === 'col-down-val-po' && (
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); applyEffort(card.id, 'uat', 8); }}
                   style={{ background: 'var(--accent-emerald)', color: '#fff', border: 'none', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
@@ -188,7 +188,7 @@ export const Card = ({ card }) => {
                   +8h
                 </button>
               )}
-              {card.effortLeft.uat > 0 && capacity.uat >= 1 && card.columnId === 'col-uat-doing' && (
+              {card.effortLeft.uat > 0 && capacity.uat >= 1 && card.columnId === 'col-down-val-po' && (
                 <button 
                   onPointerDown={(e) => { e.stopPropagation(); applyEffort(card.id, 'uat', 1); }}
                   style={{ background: 'transparent', color: 'var(--accent-emerald)', border: '1px solid var(--accent-emerald)', borderRadius: '4px', padding: '2px 4px', cursor: 'pointer', fontSize: '10px' }}

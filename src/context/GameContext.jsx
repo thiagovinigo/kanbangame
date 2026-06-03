@@ -113,6 +113,16 @@ export const GameProvider = ({ children }) => {
 
       // Rule 2: Effort completion (Definition of Done)
       const colIndex = columns.findIndex(c => c.id === toColumnId);
+      // Rule 3: Sequential movement (Do not skip columns)
+      const currentIndex = columns.findIndex(c => c.id === card.columnId);
+      if (colIndex > currentIndex + 1) {
+        showFeedback(
+          '❌ Movimento Inválido', 
+          `Você não pode pular colunas no fluxo Kanban! Mova o cartão sequencialmente para a próxima etapa.`, 
+          'warning'
+        );
+        return prevCards;
+      }
       
       // DEV effort required before entering 'Desenvolvimento Finalizado' or beyond
       if (colIndex >= 7 && card.effortLeft.dev > 0) {
@@ -161,7 +171,7 @@ export const GameProvider = ({ children }) => {
 
     // Consume from capacity
     if (capacity[effortType] < amount) {
-      showFeedback('🔋 Capacidade Esgotada', `A equipe de ${effortType.toUpperCase()} não possui mais horas disponíveis neste dia.\n\nLembre-se: horas importam menos que eficiência. Avance para o Próximo Dia para continuar fluindo!`, 'warning');
+      showFeedback('🔋 Capacidade Esgotada', `A equipe de ${effortType.toUpperCase()} não possui mais horas disponíveis neste dia.\n\nAvance para o Próximo Dia para continuar fluindo!`, 'warning');
       return;
     }
     setCapacity(prev => ({ ...prev, [effortType]: prev[effortType] - amount }));
@@ -228,6 +238,7 @@ export const GameProvider = ({ children }) => {
 
       // Pull phase
       tryPull('col-down-ready-dev', 'col-down-dev');
+      tryPull('col-down-dev-done', 'col-down-ready-test');
       tryPull('col-down-ready-test', 'col-down-testing');
       tryPull('col-down-ready-homolog', 'col-down-val-po');
       tryPull('col-down-homologado', 'col-down-ready-install');
@@ -245,8 +256,6 @@ export const GameProvider = ({ children }) => {
         }
         if (newCards[index].effortLeft.dev === 0) {
           tryAdvance(index, 'col-down-dev-done');
-          // Also try to move it directly to ready-test if it's done with dev
-          tryAdvance(index, 'col-down-ready-test');
         }
       });
 
@@ -277,7 +286,6 @@ export const GameProvider = ({ children }) => {
         }
         if (newCards[index].effortLeft.uat === 0) {
           tryAdvance(index, 'col-down-homologado');
-          tryAdvance(index, 'col-down-ready-install');
         }
       });
 
