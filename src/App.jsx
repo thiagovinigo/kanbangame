@@ -11,9 +11,10 @@ import { DailyModal } from './components/DailyModal';
 import { DailyGuidePanel } from './components/DailyGuidePanel';
 import { RetrospectiveDashboard } from './components/RetrospectiveDashboard';
 import { DemoModal } from './components/DemoModal';
-import { CFDGuideModal } from './components/CFDGuideModal';
+import { CFDDashboard } from './components/CFDDashboard';
+import { NarratorOverlay } from './components/NarratorOverlay';
 import { useAutoSimulation } from './hooks/useAutoSimulation';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle } from 'lucide-react';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -23,7 +24,7 @@ function AppContent() {
   const [isDailyOpen, setIsDailyOpen] = useState(false);
   const [isRetroOpen, setIsRetroOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
-  const [isCFDGuideOpen, setIsCFDGuideOpen] = useState(false);
+  const [isCFDDashboardOpen, setIsCFDDashboardOpen] = useState(false);
 
   const simulation = useAutoSimulation({
     setIsReplenishmentOpen,
@@ -55,6 +56,12 @@ function AppContent() {
             <PlayCircle size={18} />
             Auto-Simulação
           </button>
+          
+          <button className="btn btn-secondary" onClick={() => setIsCFDDashboardOpen(true)} title="Abrir Análise do Cumulative Flow Diagram" style={{ borderColor: 'var(--accent-emerald)', color: 'var(--accent-emerald)', fontWeight: 'bold' }}>
+            <TrendingUp size={18} />
+            Analisar CFD
+          </button>
+
           <button className="btn btn-secondary" onClick={() => setIsDemoOpen(true)} title="Fazer Reunião de Demonstração (Review)" style={{ borderColor: 'var(--accent-amber)', color: 'var(--accent-amber)' }}>
             <Presentation size={18} />
             Demo
@@ -81,7 +88,7 @@ function AppContent() {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <ControlPanel />
         <Board onOpenPolicy={(col) => setPolicyColumn(col)} />
-        <MetricsPanel onOpenCFDGuide={() => setIsCFDGuideOpen(true)} />
+        <MetricsPanel />
       </main>
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
@@ -90,7 +97,7 @@ function AppContent() {
       <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
       <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
-      <CFDGuideModal isOpen={isCFDGuideOpen} onClose={() => setIsCFDGuideOpen(false)} />
+      <CFDDashboard isOpen={isCFDDashboardOpen} onClose={() => setIsCFDDashboardOpen(false)} />
       <FeedbackModal />
       {simulation.isActive && (
         <NarratorOverlay 

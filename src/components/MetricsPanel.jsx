@@ -90,55 +90,6 @@ export const MetricsPanel = ({ onOpenCFDGuide }) => {
         )}
       </div>
 
-      {/* Cumulative Flow Diagram */}
-      <div className="glass-panel" style={{ flex: 1, padding: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <TrendingUp size={18} color="var(--accent-emerald)" />
-            Fluxo Cumulativo (CFD)
-          </h3>
-          <button 
-            onClick={() => onOpenCFDGuide()}
-            className="btn btn-secondary" 
-            style={{ padding: '4px 12px', fontSize: '0.8rem', borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: '6px' }}
-            title="Como ler o CFD e Anti-Padrões"
-          >
-            <span style={{ fontWeight: 'bold' }}>ℹ️</span> Guia do CFD
-          </button>
-        </div>
-        
-        {history.length > 0 ? (
-          <div style={{ height: '200px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={history}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-glass)" vertical={false} />
-                <XAxis dataKey="turn" stroke="var(--text-muted)" fontSize={12} />
-                <YAxis stroke="var(--text-muted)" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}
-                  itemStyle={{ color: 'var(--text-primary)' }}
-                />
-                {[...columns].reverse().map((col, index) => (
-                  <Area 
-                    key={col.id} 
-                    type="monotone" 
-                    dataKey={col.id}
-                    name={col.title}
-                    stackId="1" 
-                    stroke={colors[index % colors.length]} 
-                    fill={colors[index % colors.length]} 
-                  />
-                ))}
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-            Play a turn to see CFD
-          </div>
-        )}
-      </div>
-
       </div>
     </div>
   );
