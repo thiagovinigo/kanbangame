@@ -186,29 +186,51 @@ export const CFDDashboard = ({ isOpen, onClose }) => {
         <section style={{ marginTop: '24px' }}>
           <h2 style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-glass)', paddingBottom: '16px', marginBottom: '24px' }}>
             <AlertTriangle size={28} color="var(--accent-amber)" />
-            Guia: Anti-Padrões Famosos do CFD
+            Cartilha de Padrões de CFD
           </h2>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
             
-            <div className="glass-panel" style={{ padding: '24px' }}>
-              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>1. Boca de Jacaré (Alargamento)</h4>
-              <p style={{ color: 'var(--text-secondary)', margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: '1.5' }}>Uma faixa colorida engrossa enquanto as de baixo ficam finas. <strong>Gargalo</strong> grave, o Lead Time vai aumentar.</p>
+            <div className="glass-panel" style={{ padding: '24px', borderTop: '4px solid var(--accent-rose)' }}>
+              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>1. Boca de Jacaré</h4>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Indica:</strong> Aumento de WIP e troca de contexto.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Ações:</strong> Aplicar limite de WIP na coluna.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 0 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Motivos:</strong> Bloqueios, ansiedade de começar, pressão por paralelismo.</p>
             </div>
 
-            <div className="glass-panel" style={{ padding: '24px' }}>
-              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>2. Degrau Liso (Flatlines)</h4>
-              <p style={{ color: 'var(--text-secondary)', margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: '1.5' }}>Linhas ficam horizontais por dias. Ninguém entrega nada. Ocorre quando o time inteiro fica <strong>Bloqueado</strong>.</p>
+            <div className="glass-panel" style={{ padding: '24px', borderTop: '4px solid var(--accent-amber)' }}>
+              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>2. Escadas</h4>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Indica:</strong> Lotes grandes, timeboxes rígidos ou janelas de GMUD.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Ações:</strong> Fazer mais releases e buscar fluxo contínuo.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 0 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Motivos:</strong> Itens de trabalho muito grandes ou acúmulo artificial.</p>
             </div>
 
-            <div className="glass-panel" style={{ padding: '24px' }}>
-              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>3. Faixas Sumindo</h4>
-              <p style={{ color: 'var(--text-secondary)', margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: '1.5' }}>Uma faixa zera de espessura. Indica <strong>Starvation (Fome)</strong>. A etapa está livre, mas a anterior não gera trabalho.</p>
+            <div className="glass-panel" style={{ padding: '24px', borderTop: '4px solid var(--text-muted)' }}>
+              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>3. Platô (Linhas Retas)</h4>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Indica:</strong> Nada se moveu no período.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Ações:</strong> Investigar bloqueios, quebrar itens, verificar feriados.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 0 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Motivos:</strong> Férias coletivas, ambiente indisponível, itens gigantes.</p>
             </div>
 
-            <div className="glass-panel" style={{ padding: '24px' }}>
-              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>4. Quedas no Gráfico</h4>
-              <p style={{ color: 'var(--text-secondary)', margin: '0 0 12px 0', fontSize: '0.9rem', lineHeight: '1.5' }}>O gráfico sofre uma queda para baixo. Como o CFD é cumulativo, se ele cair indica que cartões <strong>sumiram ou voltaram pra trás</strong>.</p>
+            <div className="glass-panel" style={{ padding: '24px', borderTop: '4px solid var(--accent-blue)' }}>
+              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>4. Uma etapa em linha reta</h4>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Indica:</strong> Starvation (fome/nenhum card) em uma etapa.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Ações:</strong> Força-tarefa para entregar itens que estão bloqueando antes.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 0 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Motivos:</strong> Bloqueios nas etapas iniciais ou itens pesados travando fluxo.</p>
+            </div>
+
+            <div className="glass-panel" style={{ padding: '24px', borderTop: '4px solid var(--accent-purple)' }}>
+              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>5. Linhas descendo</h4>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Indica:</strong> Itens voltando para trás no fluxo ou projetos cancelados.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Ações:</strong> Avaliar se o cancelamento foi correto, entender o retorno.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 0 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Motivos:</strong> Falha nas políticas de entrada, trabalho re-alocado.</p>
+            </div>
+
+            <div className="glass-panel" style={{ padding: '24px', borderTop: '4px solid var(--accent-emerald)' }}>
+              <h4 style={{ color: 'var(--text-primary)', margin: '0 0 8px 0', fontSize: '1.1rem' }}>6. Baleia Penteada (Perfeito)</h4>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Indica:</strong> Time com fluxo maduro no uso de Kanban.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Ações:</strong> Manter a consistência e celebrar previsibilidade.</p>
+              <p style={{ color: 'var(--text-secondary)', margin: '0 0 0 0', fontSize: '0.9rem', lineHeight: '1.5' }}><strong>Consequências:</strong> As fases têm a mesma velocidade. Cabelos colados ao corpo = menor WIP e Lead Time.</p>
             </div>
 
           </div>

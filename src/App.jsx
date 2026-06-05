@@ -14,7 +14,7 @@ import { DemoModal } from './components/DemoModal';
 import { CFDDashboard } from './components/CFDDashboard';
 import { NarratorOverlay } from './components/NarratorOverlay';
 import { useAutoSimulation } from './hooks/useAutoSimulation';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp, BookOpen } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -82,6 +82,10 @@ function AppContent() {
             <GraduationCap size={18} />
             Aprender Kanban
           </button>
+          <a href="/material_treinamento.html" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ textDecoration: 'none', borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)', fontWeight: 'bold' }}>
+            <BookOpen size={18} />
+            Guia Completo
+          </a>
         </div>
       </header>
       
