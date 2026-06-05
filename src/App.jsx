@@ -11,7 +11,7 @@ import { DailyModal } from './components/DailyModal';
 import { DailyGuidePanel } from './components/DailyGuidePanel';
 import { RetrospectiveDashboard } from './components/RetrospectiveDashboard';
 import { DemoModal } from './components/DemoModal';
-import { NarratorOverlay } from './components/NarratorOverlay';
+import { CFDGuideModal } from './components/CFDGuideModal';
 import { useAutoSimulation } from './hooks/useAutoSimulation';
 import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle } from 'lucide-react';
 import './index.css';
@@ -23,6 +23,7 @@ function AppContent() {
   const [isDailyOpen, setIsDailyOpen] = useState(false);
   const [isRetroOpen, setIsRetroOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const [isCFDGuideOpen, setIsCFDGuideOpen] = useState(false);
 
   const simulation = useAutoSimulation({
     setIsReplenishmentOpen,
@@ -80,7 +81,7 @@ function AppContent() {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <ControlPanel />
         <Board onOpenPolicy={(col) => setPolicyColumn(col)} />
-        <MetricsPanel />
+        <MetricsPanel onOpenCFDGuide={() => setIsCFDGuideOpen(true)} />
       </main>
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
@@ -89,6 +90,7 @@ function AppContent() {
       <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
       <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
+      <CFDGuideModal isOpen={isCFDGuideOpen} onClose={() => setIsCFDGuideOpen(false)} />
       <FeedbackModal />
       {simulation.isActive && (
         <NarratorOverlay 
