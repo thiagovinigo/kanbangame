@@ -27,7 +27,10 @@ export const CFDDashboard = ({ isOpen, onClose }) => {
 
   // Cores do Kanban
   const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#64748b', '#0ea5e9'];
-  const reversedColumns = useMemo(() => [...columns].reverse(), [columns]);
+  // Conceito Kanban University: O CFD oficial de Delivery começa no Ponto de Comprometimento (Commitment Point).
+  // Upstream (opções e ideias) não entra no CFD principal, pois a variação distorce a escala de fluxo.
+  const downstreamColumns = useMemo(() => columns.filter(col => col.id.startsWith('col-down-')), [columns]);
+  const reversedColumns = useMemo(() => [...downstreamColumns].reverse(), [downstreamColumns]);
 
   // Motor de Diagnóstico Dinâmico
   const diagnosis = useMemo(() => {
@@ -54,8 +57,8 @@ export const CFDDashboard = ({ isOpen, onClose }) => {
     }
 
     // 2. Analisar Alargamento (Gargalo) e Starvation em colunas ativas
-    columns.forEach(col => {
-      if (col.id === 'col-down-done' || col.id === 'col-up-new' || col.id === 'col-backlog') return;
+    downstreamColumns.forEach(col => {
+      if (col.id === 'col-down-done') return;
       
       const currVal = last[col.id] || 0;
       const prevVal = prev[col.id] || 0;

@@ -1,6 +1,6 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from 'react';
 import { initialColumns, initialCards } from '../utils/initialState';
+import { v4 as uuidv4 } from 'uuid';
 
 const GameContext = createContext();
 
@@ -39,25 +39,50 @@ export const GameProvider = ({ children }) => {
   
   // Track metrics each turn
   const nextTurn = () => {
+    // Gerar 1 ou 2 novos cartões no Backlog para simular demanda contínua
+    const newItemsCount = Math.floor(Math.random() * 2) + 1; // 1 or 2
+    const newItems = Array.from({ length: newItemsCount }).map((_, i) => ({
+      id: uuidv4(),
+      title: `Demanda ${turn}-${i + 1}`,
+      type: Math.random() > 0.85 ? 'urgente' : 'padrao', // 15% chance de urgente
+      columnId: 'col-up-new',
+      effortLeft: { 
+        dev: Math.floor(Math.random() * 16) + 8, 
+        test: Math.floor(Math.random() * 8) + 4, 
+        uat: Math.floor(Math.random() * 8) + 4 
+      },
+      isBlocked: false,
+      activeTime: 0,
+      waitTime: 0,
+      customerValidated: false
+    }));
+
     // Record CFD snapshot before moving to next day
     const snapshot = { turn };
     columns.forEach(col => {
-      snapshot[col.id] = cards.filter(c => c.columnId === col.id).length;
+      let count = cards.filter(c => c.columnId === col.id).length;
+      if (col.id === 'col-up-new') {
+        count += newItems.length; // Conta os itens que acabaram de chegar
+      }
+      snapshot[col.id] = count;
     });
     setHistory(prev => [...prev, snapshot]);
     
     // Update active vs wait times for flow efficiency
-    setCards(prevCards => prevCards.map(c => {
-      if (c.startedAt && !c.completedAt) {
-        const col = columns.find(col => col.id === c.columnId);
-        if (col && col.role === 'active') {
-          return { ...c, activeTime: c.activeTime + 1 };
-        } else if (col && (col.role === 'queue' || col.role === 'done')) {
-          return { ...c, waitTime: c.waitTime + 1 };
+    setCards(prevCards => {
+      const updatedCards = prevCards.map(c => {
+        if (c.startedAt && !c.completedAt) {
+          const col = columns.find(col => col.id === c.columnId);
+          if (col && col.role === 'active') {
+            return { ...c, activeTime: c.activeTime + 1 };
+          } else if (col && (col.role === 'queue' || col.role === 'done')) {
+            return { ...c, waitTime: c.waitTime + 1 };
+          }
         }
-      }
-      return c;
-    }));
+        return c;
+      });
+      return [...updatedCards, ...newItems]; // Adiciona as novas demandas ao pool
+    });
 
     setTurn(prev => prev + 1);
     setCapacity({
