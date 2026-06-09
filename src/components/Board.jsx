@@ -7,8 +7,24 @@ import { Info } from 'lucide-react';
 export const Board = ({ onOpenPolicy }) => {
   const { columns, moveCard, showFeedback, dailyStep } = useGame();
   const [showCommitmentTooltip, setShowCommitmentTooltip] = useState(false);
+  const boardRef = React.useRef(null);
+  
   const isDailyMode = dailyStep !== null;
   const currentDailyColId = isDailyMode ? columns[dailyStep].id : null;
+
+  React.useEffect(() => {
+    if (isDailyMode && boardRef.current) {
+      // Pequeno delay para garantir que a renderização aconteceu
+      setTimeout(() => {
+        if (boardRef.current) {
+          boardRef.current.scrollTo({
+            left: boardRef.current.scrollWidth,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  }, [isDailyMode]);
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -45,7 +61,7 @@ export const Board = ({ onOpenPolicy }) => {
   const downstreamCols = columns.filter(c => c.id.startsWith('col-down-'));
 
   return (
-    <div className="board-container animate-fade-in" style={{ display: 'flex', flexDirection: 'column', overflowX: 'auto', paddingBottom: '20px' }}>
+    <div className="board-container animate-fade-in" ref={boardRef} style={{ display: 'flex', flexDirection: 'column', overflowX: 'auto', paddingBottom: '20px' }}>
       
       {/* Zone Headers */}
       <div style={{ display: 'flex', minWidth: 'max-content', paddingLeft: '162px', gap: '40px', marginBottom: '8px' }}>

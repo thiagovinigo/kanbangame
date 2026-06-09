@@ -12,9 +12,10 @@ import { DailyGuidePanel } from './components/DailyGuidePanel';
 import { RetrospectiveDashboard } from './components/RetrospectiveDashboard';
 import { DemoModal } from './components/DemoModal';
 import { CFDDashboard } from './components/CFDDashboard';
+import { StorytellingDashboard } from './components/StorytellingDashboard';
 import { NarratorOverlay } from './components/NarratorOverlay';
 import { useAutoSimulation } from './hooks/useAutoSimulation';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp, BookOpen } from 'lucide-react';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp, BookOpen, Film } from 'lucide-react';
 import './index.css';
 
 function AppContent() {
@@ -25,6 +26,7 @@ function AppContent() {
   const [isRetroOpen, setIsRetroOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [isCFDDashboardOpen, setIsCFDDashboardOpen] = useState(false);
+  const [isStorytellingOpen, setIsStorytellingOpen] = useState(false);
 
   const simulation = useAutoSimulation({
     setIsReplenishmentOpen,
@@ -86,6 +88,10 @@ function AppContent() {
             <BookOpen size={18} />
             Guia Completo
           </a>
+          <button className="btn btn-secondary" onClick={() => setIsStorytellingOpen(true)} style={{ borderColor: '#f97316', color: '#f97316', fontWeight: 'bold' }}>
+            <Film size={18} />
+            🎬 Exemplo Real
+          </button>
         </div>
       </header>
       
@@ -102,6 +108,7 @@ function AppContent() {
       <DailyGuidePanel />
       <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
       <CFDDashboard isOpen={isCFDDashboardOpen} onClose={() => setIsCFDDashboardOpen(false)} />
+      <StorytellingDashboard isOpen={isStorytellingOpen} onClose={() => setIsStorytellingOpen(false)} />
       <FeedbackModal />
       {simulation.isActive && (
         <NarratorOverlay 

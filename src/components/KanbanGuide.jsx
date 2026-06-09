@@ -7,28 +7,30 @@ export const KanbanGuide = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const tabs = [
-    { id: 0, title: 'Fundamentos', icon: BookOpen },
-    { id: 1, title: 'Design de Fluxo & Políticas', icon: Layout },
-    { id: 2, title: 'Buffers e Filas', icon: Columns },
-    { id: 3, title: 'WIP Limit e Lei de Little', icon: Scale },
-    { id: 4, title: 'Impedimentos (Blockers)', icon: AlertOctagon },
-    { id: 5, title: 'Classes de Serviço', icon: Tags },
-    { id: 6, title: 'Métricas Kanban', icon: BarChart2 },
-    { id: 7, title: 'Cadências (Material Completo)', icon: Info },
-    { id: 8, title: 'Como Jogar o Simulador', icon: Gamepad2 }
+    { id: 0, title: 'Princípios, Práticas e Valores', icon: BookOpen },
+    { id: 1, title: 'Upstream vs Downstream', icon: Layout },
+    { id: 2, title: 'Design de Fluxo & Políticas', icon: Layout },
+    { id: 3, title: 'Buffers e Filas', icon: Columns },
+    { id: 4, title: 'WIP Limit e Lei de Little', icon: Scale },
+    { id: 5, title: 'Impedimentos (Blockers)', icon: AlertOctagon },
+    { id: 6, title: 'Classes de Serviço', icon: Tags },
+    { id: 7, title: 'Métricas Kanban', icon: BarChart2 },
+    { id: 8, title: 'Cadências (Material Completo)', icon: Info },
+    { id: 9, title: 'Como Jogar o Simulador', icon: Gamepad2 }
   ];
 
   const renderContent = () => {
     switch (activeTab) {
       case 0: return <Fundamentos />;
-      case 1: return <DesignFluxo />;
-      case 2: return <Buffers />;
-      case 3: return <WipLittle />;
-      case 4: return <Impedimentos />;
-      case 5: return <ClassesServico />;
-      case 6: return <Metricas />;
-      case 7: return <Cadencias />;
-      case 8: return <Simulador />;
+      case 1: return <UpstreamDownstream />;
+      case 2: return <DesignFluxo />;
+      case 3: return <Buffers />;
+      case 4: return <WipLittle />;
+      case 5: return <Impedimentos />;
+      case 6: return <ClassesServico />;
+      case 7: return <Metricas />;
+      case 8: return <Cadencias />;
+      case 9: return <Simulador />;
       default: return null;
     }
   };
@@ -136,22 +138,82 @@ const ContentBox = ({ children, color = 'var(--accent-blue)', bg = 'rgba(59, 130
 
 const Fundamentos = () => (
   <div>
-    <h1 style={{ color: 'var(--accent-blue)', marginBottom: '16px' }}>1. Fundamentos do Kanban</h1>
+    <h1 style={{ color: 'var(--accent-blue)', marginBottom: '16px' }}>1. Princípios, Práticas e Valores</h1>
     <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '32px' }}>O Kanban não é uma metodologia de desenvolvimento, é um método de <strong>gestão de fluxo</strong>. Ele assume que você já tem um processo e ajuda a otimizá-lo iterativamente.</p>
     
-    <h3>Sistema Puxado vs Sistema Empurrado</h3>
+    <h3>Os 9 Valores do Kanban</h3>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
+      {['Transparência', 'Equilíbrio', 'Colaboração', 'Foco no Cliente', 'Fluxo', 'Liderança', 'Entendimento', 'Acordo', 'Respeito'].map(v => (
+        <span key={v} style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 12px', borderRadius: '16px', fontSize: '0.9rem', color: 'var(--accent-blue)' }}>{v}</span>
+      ))}
+    </div>
+
     <ContentBox color="var(--accent-emerald)" bg="rgba(16, 185, 129, 0.05)">
-      <strong>Sistema Empurrado (Push):</strong> O gerente joga tarefas para a equipe independentemente da capacidade deles. Resultado: Sobrecarga, burnout e muito trabalho em andamento que nunca termina.<br/><br/>
-      <strong>Sistema Puxado (Pull):</strong> A equipe só "puxa" um novo trabalho quando tem capacidade livre (sinalizada pelo WIP Limit). Resultado: O trabalho flui de forma suave, previsível e sem estresse.
+      <h3 style={{ marginTop: 0, color: 'var(--accent-emerald)' }}>Princípios de Gestão de Mudança</h3>
+      <ul style={{ margin: 0 }}>
+        <li><strong>Comece com o que você faz hoje:</strong> Entenda o processo atual, respeite os papéis e responsabilidades atuais.</li>
+        <li><strong>Concorde em buscar melhoria através de mudanças evolucionárias:</strong> Mudanças drásticas geram resistência. Evolua passo a passo.</li>
+        <li><strong>Encoraje atos de liderança em todos os níveis:</strong> Qualquer pessoa da equipe pode sugerir e liderar uma melhoria.</li>
+      </ul>
     </ContentBox>
 
-    <h3>Os Princípios Fundamentais</h3>
-    <ul>
-      <li><strong>Gestão Visual:</strong> Tornar o trabalho invisível em visível. Se você não vê a fila, você não consegue gerenciá-la.</li>
-      <li><strong>Limitar o Trabalho em Progresso (WIP):</strong> A restrição que cria o sistema puxado.</li>
-      <li><strong>Gerenciar o Fluxo:</strong> Focar no trabalho movendo-se pelo sistema, não nas pessoas trabalhando (eficiência de fluxo vs eficiência de recursos).</li>
-      <li><strong>Tornar as Políticas Explícitas:</strong> As regras do jogo devem estar claras para todos (ex: Definition of Done).</li>
-    </ul>
+    <ContentBox color="var(--accent-purple)" bg="rgba(139, 92, 246, 0.05)">
+      <h3 style={{ marginTop: 0, color: 'var(--accent-purple)' }}>Princípios de Entrega de Serviço</h3>
+      <ul style={{ margin: 0 }}>
+        <li><strong>Entenda e foque nas necessidades e expectativas do cliente.</strong></li>
+        <li><strong>Gerencie o trabalho, deixe as pessoas se auto-organizarem ao redor dele.</strong></li>
+        <li><strong>Evolua as políticas para melhorar os resultados do negócio e do cliente.</strong></li>
+      </ul>
+    </ContentBox>
+
+    <h3>As 6 Práticas Gerais</h3>
+    <ol style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <li><strong>Visualizar:</strong> Tornar o fluxo de trabalho, os bloqueios e as filas visíveis. Se você não vê, você não gerencia.</li>
+      <li><strong>Limitar o WIP (Work In Progress):</strong> A principal alavanca. Pare de começar e comece a terminar.</li>
+      <li><strong>Gerenciar o Fluxo:</strong> Focar na eficiência das entregas, não no tempo que as pessoas ficam ocupadas.</li>
+      <li><strong>Tornar as Políticas Explícitas:</strong> Escrever as regras do jogo (Definition of Done, DoR, critérios de puxar).</li>
+      <li><strong>Implementar Loops de Feedback (Cadências):</strong> Reuniões estruturadas para analisar o sistema e o serviço (Daily, Replenishment, Retro).</li>
+      <li><strong>Melhorar Colaborativamente, Evoluir Experimentalmente:</strong> Usar o método científico e dados (métricas) para evoluir.</li>
+    </ol>
+  </div>
+);
+
+const UpstreamDownstream = () => (
+  <div>
+    <h1 style={{ color: 'var(--accent-amber)', marginBottom: '16px' }}>2. Upstream vs Downstream</h1>
+    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '32px' }}>O fluxo Kanban é dividido em dois grandes ecossistemas. Entender onde um termina e o outro começa é fundamental para a saúde do sistema.</p>
+    
+    <div style={{ display: 'flex', gap: '20px', marginBottom: '24px' }}>
+      <div style={{ flex: 1, background: 'rgba(245, 158, 11, 0.05)', padding: '20px', borderRadius: '8px', borderTop: '4px solid var(--accent-amber)' }}>
+        <h3 style={{ marginTop: 0, color: 'var(--accent-amber)' }}>🌊 Upstream (Discovery)</h3>
+        <p>A fase de exploração, refinamento e triagem das opções.</p>
+        <ul>
+          <li><strong>Natureza:</strong> Mundo das <em>Opções</em>. Muitas ideias entram, poucas sobrevivem.</li>
+          <li><strong>Objetivo:</strong> Descobrir o que construir. Descartar ideias ruins cedo.</li>
+          <li><strong>Papéis comuns:</strong> Product Owner, PM, UX, Tech Lead.</li>
+          <li><strong>Compromisso:</strong> NENHUM. Uma ideia no upstream pode ser jogada fora a qualquer momento.</li>
+          <li><strong>Métrica Foco:</strong> Taxa de descarte (Discard Rate), Lead Time de Triagem.</li>
+        </ul>
+      </div>
+
+      <div style={{ flex: 1, background: 'rgba(16, 185, 129, 0.05)', padding: '20px', borderRadius: '8px', borderTop: '4px solid var(--accent-emerald)' }}>
+        <h3 style={{ marginTop: 0, color: 'var(--accent-emerald)' }}>🛠️ Downstream (Delivery)</h3>
+        <p>A fase de execução, desenvolvimento e entrega ao cliente.</p>
+        <ul>
+          <li><strong>Natureza:</strong> Mundo do <em>Comprometimento</em>.</li>
+          <li><strong>Objetivo:</strong> Entregar o que foi prometido com qualidade e previsibilidade (Lead Time).</li>
+          <li><strong>Papéis comuns:</strong> Desenvolvedores, QA, Infraestrutura.</li>
+          <li><strong>Compromisso:</strong> TOTAL. Uma vez que o item entra aqui, a equipe promete entregá-lo.</li>
+          <li><strong>Métrica Foco:</strong> Lead Time, Throughput, Eficiência de Fluxo.</li>
+        </ul>
+      </div>
+    </div>
+
+    <ContentBox color="var(--accent-purple)">
+      <h3 style={{ marginTop: 0, color: 'var(--accent-purple)' }}>O Ponto de Comprometimento (Commitment Point)</h3>
+      <p>É a linha invisível que separa o Upstream do Downstream. Quando um item cruza essa linha, ele deixa de ser uma "opção" e vira uma "promessa" para o cliente.</p>
+      <p style={{ margin: 0 }}><strong>Dica de Ouro:</strong> O cronômetro do seu Lead Time só começa a contar a partir do Commitment Point. O tempo que a ideia passou no Backlog não entra na conta do Delivery Lead Time.</p>
+    </ContentBox>
   </div>
 );
 
