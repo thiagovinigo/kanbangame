@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from 'react';
 import { initialColumns, initialCards } from '../utils/initialState';
-import { v4 as uuidv4 } from 'uuid';
 
 const GameContext = createContext();
 
@@ -42,7 +41,7 @@ export const GameProvider = ({ children }) => {
     // Gerar 1 ou 2 novos cartões no Backlog para simular demanda contínua
     const newItemsCount = Math.floor(Math.random() * 2) + 1; // 1 or 2
     const newItems = Array.from({ length: newItemsCount }).map((_, i) => ({
-      id: uuidv4(),
+      id: `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title: `Demanda ${turn}-${i + 1}`,
       type: Math.random() > 0.85 ? 'urgente' : 'padrao', // 15% chance de urgente
       columnId: 'col-up-new',
