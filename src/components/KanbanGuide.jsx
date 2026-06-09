@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { X, BookOpen, Layout, Settings, Columns, Scale, AlertOctagon, Tags, BarChart2, Gamepad2, Info, ArrowRight } from 'lucide-react';
+import { X, BookOpen, Layout, Settings, Columns, Scale, AlertOctagon, Tags, BarChart2, Gamepad2, Info, ArrowRight, Film } from 'lucide-react';
 
-export const KanbanGuide = ({ isOpen, onClose }) => {
+export const KanbanGuide = ({ isOpen, onClose, onOpenStorytelling }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   if (!isOpen) return null;
@@ -15,7 +15,7 @@ export const KanbanGuide = ({ isOpen, onClose }) => {
     { id: 5, title: 'Impedimentos (Blockers)', icon: AlertOctagon },
     { id: 6, title: 'Classes de Serviço', icon: Tags },
     { id: 7, title: 'Métricas Kanban', icon: BarChart2 },
-    { id: 8, title: 'Cadências (Material Completo)', icon: Info },
+    { id: 8, title: 'Aprofundamento & Prática', icon: Info },
     { id: 9, title: 'Como Jogar o Simulador', icon: Gamepad2 }
   ];
 
@@ -29,7 +29,7 @@ export const KanbanGuide = ({ isOpen, onClose }) => {
       case 5: return <Impedimentos />;
       case 6: return <ClassesServico />;
       case 7: return <Metricas />;
-      case 8: return <Cadencias />;
+      case 8: return <Cadencias onOpenStorytelling={onOpenStorytelling} />;
       case 9: return <Simulador />;
       default: return null;
     }
@@ -421,39 +421,67 @@ const Simulador = () => (
   </div>
 );
 
-const Cadencias = () => (
+const Cadencias = ({ onOpenStorytelling }) => (
   <div>
-    <h1 style={{ color: 'var(--accent-blue)', marginBottom: '16px' }}>8. Cadências (Material Completo)</h1>
-    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '32px' }}>O Kanban não é apenas um quadro, é um sistema gerencial que possui <strong>reuniões e ciclos de feedback (Cadências)</strong> para garantir o alinhamento da estratégia com a entrega.</p>
+    <h1 style={{ color: 'var(--accent-blue)', marginBottom: '16px' }}>8. Aprofundamento & Prática</h1>
+    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '32px' }}>O Kanban não é apenas um quadro, é um sistema gerencial. Explore nossos materiais completos para dominar as cadências e veja um exemplo real do framework em ação.</p>
 
-    <div style={{ background: 'var(--bg-secondary)', padding: '40px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
-      <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '20px', borderRadius: '50%' }}>
-        <BookOpen size={48} color="var(--accent-blue)" />
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+      <div style={{ background: 'var(--bg-secondary)', padding: '32px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '20px', borderRadius: '50%' }}>
+          <BookOpen size={40} color="var(--accent-blue)" />
+        </div>
+        <div>
+          <h2 style={{ margin: '0 0 8px 0', color: 'var(--text-primary)', fontSize: '1.2rem' }}>Guia Completo Oficial</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+            Material em tela cheia detalhando as 7 cadências do Kanban, diferenças para o Scrum e anti-padrões de fluxo.
+          </p>
+        </div>
+        <a 
+          href="/material_treinamento.html" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ 
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            background: 'var(--bg-glass)', border: '1px solid var(--accent-blue)',
+            color: 'var(--accent-blue)', padding: '12px 24px', borderRadius: '8px', 
+            textDecoration: 'none', fontWeight: 'bold', fontSize: '1rem',
+            transition: 'all 0.2s', marginTop: 'auto'
+          }}
+          onMouseOver={e => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'; }}
+          onMouseOut={e => { e.currentTarget.style.background = 'var(--bg-glass)'; }}
+        >
+          <BookOpen size={20} />
+          Abrir Guia
+        </a>
       </div>
-      <div>
-        <h2 style={{ margin: '0 0 12px 0', color: 'var(--text-primary)' }}>Aprofunde-se nas Cadências</h2>
-        <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
-          Preparamos um material complementar exclusivo detalhando as 7 cadências do Kanban, desde a Reunião Diária (Kanban Meeting) até as revisões estratégicas.
-        </p>
+
+      <div style={{ background: 'var(--bg-secondary)', padding: '32px', borderRadius: '12px', textAlign: 'center', border: '1px solid var(--border-glass)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div style={{ background: 'rgba(249, 115, 22, 0.1)', padding: '20px', borderRadius: '50%' }}>
+          <Film size={40} color="#f97316" />
+        </div>
+        <div>
+          <h2 style={{ margin: '0 0 8px 0', color: 'var(--text-primary)', fontSize: '1.2rem' }}>Exemplo Interativo</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+            Acompanhe uma semana real de um Squad de Open Banking, com board animado, incidentes de produção e as reuniões diárias.
+          </p>
+        </div>
+        <button 
+          onClick={onOpenStorytelling}
+          style={{ 
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            background: '#f97316', border: 'none', cursor: 'pointer',
+            color: 'white', padding: '12px 24px', borderRadius: '8px', 
+            fontWeight: 'bold', fontSize: '1rem',
+            boxShadow: '0 4px 15px rgba(249, 115, 22, 0.4)', transition: 'transform 0.2s', marginTop: 'auto'
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          <Film size={20} />
+          🎬 Iniciar Simulação
+        </button>
       </div>
-      <a 
-        href="/material_treinamento.html" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        style={{ 
-          display: 'inline-flex', alignItems: 'center', gap: '12px',
-          background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))',
-          color: 'white', padding: '16px 32px', borderRadius: '8px', 
-          textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem',
-          boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)', transition: 'transform 0.2s'
-        }}
-        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        <BookOpen size={24} />
-        Acessar Material Completo
-      </a>
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>*O arquivo abrirá em uma nova guia interativa em tela cheia.</p>
     </div>
   </div>
 );

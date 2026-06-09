@@ -84,14 +84,6 @@ function AppContent() {
             <GraduationCap size={18} />
             Aprender Kanban
           </button>
-          <a href="/material_treinamento.html" target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ textDecoration: 'none', borderColor: 'var(--accent-blue)', color: 'var(--accent-blue)', fontWeight: 'bold' }}>
-            <BookOpen size={18} />
-            Guia Completo
-          </a>
-          <button className="btn btn-secondary" onClick={() => setIsStorytellingOpen(true)} style={{ borderColor: '#f97316', color: '#f97316', fontWeight: 'bold' }}>
-            <Film size={18} />
-            🎬 Exemplo Real
-          </button>
         </div>
       </header>
       
@@ -100,7 +92,7 @@ function AppContent() {
         <Board onOpenPolicy={(col) => setPolicyColumn(col)} />
         <MetricsPanel />
       </main>
-      <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
+      <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} onOpenStorytelling={() => { setIsRulesOpen(false); setIsStorytellingOpen(true); }} />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
       <DailyModal isOpen={isDailyOpen} onClose={() => setIsDailyOpen(false)} />
       <RetrospectiveDashboard isOpen={isRetroOpen} onClose={() => setIsRetroOpen(false)} />
