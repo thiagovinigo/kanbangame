@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { initialColumns, initialCards } from '../utils/initialState';
+import { initialColumns, initialCards, aiColumns } from '../utils/initialState';
 import { generateMockMarkdown, updateStoriesMarkdown, updatePrdMarkdown } from '../utils/mockAiResponses';
 
 const GameContext = createContext();
@@ -7,7 +6,7 @@ const GameContext = createContext();
 export const useGame = () => useContext(GameContext);
 
 export const GameProvider = ({ children, isAIMode = false }) => {
-  const [columns, setColumns] = useState(initialColumns);
+  const [columns, setColumns] = useState(isAIMode ? aiColumns : initialColumns);
   
   // Inject AI properties if missing
   const initCards = initialCards.map(c => ({
@@ -60,7 +59,7 @@ export const GameProvider = ({ children, isAIMode = false }) => {
         id: `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: `Demanda ${turn}-${i + 1}`,
         type: Math.random() > 0.85 ? 'urgente' : 'padrao', // 15% chance de urgente
-        columnId: 'col-up-new',
+        columnId: isAIMode ? 'col-ai-backlog' : 'col-up-new',
         effortTotal: { dev: devEffort, test: testEffort, uat: uatEffort },
         effortLeft: { dev: devEffort, test: testEffort, uat: uatEffort },
         isBlocked: false,
@@ -81,7 +80,7 @@ export const GameProvider = ({ children, isAIMode = false }) => {
     const snapshot = { turn };
     columns.forEach(col => {
       let count = cards.filter(c => c.columnId === col.id).length;
-      if (col.id === 'col-up-new') {
+      if (col.id === 'col-up-new' || col.id === 'col-ai-backlog') {
         count += newItems.length; // Conta os itens que acabaram de chegar
       }
       snapshot[col.id] = count;
@@ -107,21 +106,21 @@ export const GameProvider = ({ children, isAIMode = false }) => {
         finalCards = finalCards.map(c => {
           const updatedCard = { ...c };
           
-          if (c.columnId === 'col-up-ref-funcional' && !c.artifacts.prd) {
+          if (c.columnId === 'col-ai-pm' && !c.artifacts.prd) {
             updatedCard.artifacts.prd = generateMockMarkdown('prd', c.title);
             updatedCard.artifacts.stories = generateMockMarkdown('stories', c.title);
             updatedCard.aiStatus = '✅ PRD e User Stories gerados pelo Agente PM.';
             showFeedback('✨ Agente de Produto Finalizou', `O Agente PM criou o PRD para a demanda "${c.title}".`, 'info');
           }
           
-          if (c.columnId === 'col-up-ref-tecnico' && !c.artifacts.spec) {
+          if (c.columnId === 'col-ai-arch' && !c.artifacts.spec) {
             updatedCard.artifacts.spec = generateMockMarkdown('spec', c.title);
             updatedCard.aiStatus = '✅ Spec Técnica gerada pelo Agente Arquiteto.';
             showFeedback('✨ Agente Arquiteto Finalizou', `O Agente Arquiteto criou a Spec Técnica para a demanda "${c.title}".`, 'info');
           }
           
-          if (c.columnId === 'col-up-ready' && c.risks.length === 0) {
-            const doneCards = finalCards.filter(card => card.columnId === 'col-down-done');
+          if (c.columnId === 'col-ai-replenishment' && c.risks.length === 0) {
+            const doneCards = finalCards.filter(card => card.columnId === 'col-ai-done');
             if (doneCards.length > 0 && Math.random() > 0.5) {
               updatedCard.risks.push(`Alerta de Dependência: Compartilha código com "${doneCards[0].title}". Teste de regressão necessário.`);
               updatedCard.aiStatus = '⚠️ Riscos identificados na análise arquitetural.';
@@ -131,27 +130,24 @@ export const GameProvider = ({ children, isAIMode = false }) => {
             }
           }
           
-          if ((c.columnId === 'col-down-ready-test' || c.columnId === 'col-down-testing') && !c.artifacts.qa) {
+          if (c.columnId === 'col-ai-qa' && !c.artifacts.qa) {
             updatedCard.artifacts.qa = generateMockMarkdown('qa', c.title);
             updatedCard.aiStatus = '✅ Plano de Testes (BDD) gerado pelo Agente QA.';
             showFeedback('✨ Agente QA Finalizou', `O Agente QA criou o Plano de Testes para a demanda "${c.title}".`, 'info');
           }
 
           // In AI Mode, effort automatically reduces (simulating agents working in downstream)
-          if (c.columnId === 'col-down-dev' && c.effortLeft.dev > 0) {
+          if (c.columnId === 'col-ai-dev' && c.effortLeft.dev > 0) {
              updatedCard.effortLeft.dev = Math.max(0, c.effortLeft.dev - 8);
              updatedCard.aiStatus = '🤖 Agente DEV programando...';
           }
-          if (c.columnId === 'col-down-testing' && c.effortLeft.test > 0) {
+          if (c.columnId === 'col-ai-qa' && (c.effortLeft.test > 0 || c.effortLeft.uat > 0)) {
              updatedCard.effortLeft.test = Math.max(0, c.effortLeft.test - 8);
-             updatedCard.aiStatus = '🤖 Agente QA automatizando testes...';
-          }
-          if (c.columnId === 'col-down-val-po' && c.effortLeft.uat > 0) {
              updatedCard.effortLeft.uat = Math.max(0, c.effortLeft.uat - 8);
-             updatedCard.aiStatus = '🤖 Agente PO validando entrega...';
+             updatedCard.aiStatus = '🤖 Agente QA automatizando testes e homologando...';
           }
 
-          if (c.columnId === 'col-down-done' && !c.updaterRun) {
+          if (c.columnId === 'col-ai-done' && !c.updaterRun) {
              updatedCard.artifacts.releaseNotes = generateMockMarkdown('release_notes', c.title);
              updatedCard.artifacts.stories = updateStoriesMarkdown(c.artifacts.stories);
              updatedCard.artifacts.prd = updatePrdMarkdown(c.artifacts.prd);
@@ -176,7 +172,7 @@ export const GameProvider = ({ children, isAIMode = false }) => {
   };
 
   const resetGame = () => {
-    setColumns(initialColumns);
+    setColumns(isAIMode ? aiColumns : initialColumns);
     setCards(initCards);
     setTurn(1);
     setCapacity({
@@ -232,20 +228,25 @@ export const GameProvider = ({ children, isAIMode = false }) => {
         return prevCards;
       }
       
-      // DEV effort required before entering 'Desenvolvimento Finalizado' or beyond
-      if (colIndex >= 7 && card.effortLeft.dev > 0) {
+      // Validation thresholds based on current mode
+      const devDoneIndex = isAIMode ? 5 : 7; // QA or Dev-Done
+      const testDoneIndex = isAIMode ? 6 : 10; // Done or Ready-Homologacao
+      const uatDoneIndex = isAIMode ? 6 : 12; // Done or Homologado
+
+      // DEV effort required
+      if (colIndex >= devDoneIndex && card.effortLeft.dev > 0) {
         showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!', 'error');
         return prevCards;
       }
 
-      // TEST effort required before entering 'Ready to Homologação' or beyond
-      if (colIndex >= 10 && card.effortLeft.test > 0) {
+      // TEST effort required
+      if (colIndex >= testDoneIndex && card.effortLeft.test > 0) {
         showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!', 'error');
         return prevCards;
       }
 
-      // UAT effort required before entering 'Homologado' or beyond
-      if (colIndex >= 12 && card.effortLeft.uat > 0) {
+      // UAT effort required
+      if (colIndex >= uatDoneIndex && card.effortLeft.uat > 0) {
         showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão!', 'error');
         return prevCards;
       }
@@ -255,10 +256,13 @@ export const GameProvider = ({ children, isAIMode = false }) => {
           let updates = { columnId: toColumnId };
           
           // Track Start and Complete time for Lead Time metrics
-          if (!c.startedAt && colIndex >= 5) {
+          const startTrackingIndex = isAIMode ? 4 : 5; // Dev vs Ready-Dev
+          const doneColId = isAIMode ? 'col-ai-done' : 'col-down-done';
+          
+          if (!c.startedAt && colIndex >= startTrackingIndex) {
             updates.startedAt = turn;
           }
-          if (toColumnId === 'col-down-done' && !c.completedAt) {
+          if (toColumnId === doneColId && !c.completedAt) {
             updates.completedAt = turn;
           }
           
@@ -443,7 +447,8 @@ export const GameProvider = ({ children, isAIMode = false }) => {
 
     setCards(prevCards => {
       return prevCards.map(c => {
-        if (c.columnId === 'col-down-done' && !c.customerValidated) {
+        const doneColId = isAIMode ? 'col-ai-done' : 'col-down-done';
+        if (c.columnId === doneColId && !c.customerValidated) {
           // 20% chance of rejection
           const isRejected = Math.random() < 0.2;
           

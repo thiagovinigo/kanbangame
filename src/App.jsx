@@ -131,14 +131,14 @@ function App() {
 
   if (currentMode === 'ai') {
     return (
-      <GameProvider isAIMode={true}>
+      <GameProvider key="ai" isAIMode={true}>
         <AppContent onBack={() => setCurrentMode('home')} />
       </GameProvider>
     );
   }
 
   return (
-    <GameProvider isAIMode={false}>
+    <GameProvider key="classic" isAIMode={false}>
       <AppContent onBack={() => setCurrentMode('home')} />
     </GameProvider>
   );

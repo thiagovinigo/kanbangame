@@ -266,6 +266,58 @@ export const initialCards = [
   }
 ];
 
+export const aiColumns = [
+  { 
+    id: 'col-ai-backlog', 
+    title: '📥 Backlog', 
+    limit: 0, 
+    role: 'queue', 
+    policy: 'Ideias não comprometidas. O sistema puxará daqui quando houver capacidade.' 
+  },
+  { 
+    id: 'col-ai-pm', 
+    title: '📝 Agente PM (Refinamento)', 
+    limit: 4, 
+    role: 'queue', 
+    policy: 'O Agente de Produto elabora o PRD e quebra em User Stories automáticas.' 
+  },
+  { 
+    id: 'col-ai-arch', 
+    title: '🏗️ Agente Arquiteto (Design)', 
+    limit: 4, 
+    role: 'queue', 
+    policy: 'O Agente Técnico cria a Especificação e analisa a arquitetura necessária.' 
+  },
+  { 
+    id: 'col-ai-replenishment', 
+    title: '🚦 Pronto para Replenishment', 
+    limit: 5, 
+    role: 'queue', 
+    policy: 'Ponto de Compromisso. Analisador de Risco verifica dependências com o ambiente de Produção antes de autorizar o desenvolvimento.' 
+  },
+  { 
+    id: 'col-ai-dev', 
+    title: '💻 Agente Engenheiro (Dev)', 
+    limit: 3, 
+    role: 'active', 
+    policy: 'Agente escrevendo código ativamente. Esforço é reduzido automaticamente a cada dia avançado.' 
+  },
+  { 
+    id: 'col-ai-qa', 
+    title: '🧪 Agente QA (Qualidade)', 
+    limit: 3, 
+    role: 'active', 
+    policy: 'Agente gerando testes BDD e homologando a feature desenvolvida.' 
+  },
+  { 
+    id: 'col-ai-done', 
+    title: '🚀 Produção (Done)', 
+    limit: 0, 
+    role: 'done', 
+    policy: 'Agente SRE realiza o Deploy (Release Notes) e o Agente Updater sincroniza toda a documentação.' 
+  }
+];
+
 export const cardTypeColors = {
   padrao: 'var(--accent-blue)',
   urgente: 'var(--accent-rose)',
