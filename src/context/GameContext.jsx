@@ -492,8 +492,7 @@ export const GameProvider = ({ children, isAIMode = false }) => {
       updateTeamConfig,
       resetGame,
       autoPlayTurn,
-      cheatAdvanceCardsToDone,
-      cheatPopulateCards
+      cheatAdvanceCardsToDone
     }}>
       {children}
     </GameContext.Provider>
