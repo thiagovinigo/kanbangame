@@ -12,6 +12,7 @@ export const GameProvider = ({ children, isAIMode = false }) => {
   // Inject AI properties if missing
   const initCards = initialCards.map(c => ({
     ...c,
+    columnId: isAIMode ? 'col-ai-backlog' : c.columnId,
     artifacts: c.artifacts || { prd: null, spec: null, qa: null, stories: null, releaseNotes: null },
     risks: c.risks || [],
     aiStatus: c.aiStatus || '',
