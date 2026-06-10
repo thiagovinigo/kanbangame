@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, FileText, Download } from 'lucide-react';
 
 export const DocumentModal = ({ isOpen, onClose, title, content, type }) => {
@@ -48,8 +49,8 @@ export const DocumentModal = ({ isOpen, onClose, title, content, type }) => {
     }
   };
 
-  return (
-    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 1000, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)' }}>
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)' }}>
       <div 
         className="modal-content glass-panel" 
         onClick={e => e.stopPropagation()}
@@ -90,6 +91,7 @@ export const DocumentModal = ({ isOpen, onClose, title, content, type }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
