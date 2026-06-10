@@ -19,11 +19,25 @@ export const GameProvider = ({ children, isAIMode = false }) => {
     updaterRun: c.updaterRun || false
   }));
   
-  const [cards, setCards] = useState(initCards);
-  const [turn, setTurn] = useState(1);
-  const [teamConfig, setTeamConfig] = useState({ dev: 2, test: 1, uat: 1 });
-  const [capacity, setCapacity] = useState({ dev: 16, test: 8, uat: 8 });
-  const [history, setHistory] = useState([]); // For CFD metrics
+  const storageKey = isAIMode ? 'kanbanState_ai' : 'kanbanState_classic';
+
+  const loadSavedState = () => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Falha ao carregar save', e);
+    }
+    return null;
+  };
+
+  const savedState = loadSavedState();
+
+  const [cards, setCards] = useState(savedState?.cards || initCards);
+  const [turn, setTurn] = useState(savedState?.turn || 1);
+  const [teamConfig, setTeamConfig] = useState(savedState?.teamConfig || { dev: 2, test: 1, uat: 1 });
+  const [capacity, setCapacity] = useState(savedState?.capacity || { dev: 16, test: 8, uat: 8 });
+  const [history, setHistory] = useState(savedState?.history || []);
   const [feedback, setFeedback] = useState(null);
   const [dailyStep, setDailyStep] = useState(null);
 
@@ -31,6 +45,16 @@ export const GameProvider = ({ children, isAIMode = false }) => {
   const nextDailyStep = () => setDailyStep(prev => (prev !== null && prev > 5) ? prev - 1 : null);
   const prevDailyStep = () => setDailyStep(prev => (prev !== null && prev < 13) ? prev + 1 : prev);
   const stopDaily = () => setDailyStep(null);
+
+  // Auto-Save Effect
+  useEffect(() => {
+    try {
+      const stateToSave = { cards, turn, teamConfig, capacity, history };
+      localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+    } catch (e) {
+      console.error('Falha ao salvar jogo', e);
+    }
+  }, [cards, turn, teamConfig, capacity, history, storageKey]);
 
   const showFeedback = (title, message, type = 'error') => {
     setTimeout(() => {
