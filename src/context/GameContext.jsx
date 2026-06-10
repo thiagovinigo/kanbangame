@@ -40,21 +40,27 @@ export const GameProvider = ({ children }) => {
   const nextTurn = () => {
     // Gerar 1 ou 2 novos cartões no Backlog para simular demanda contínua
     const newItemsCount = Math.floor(Math.random() * 2) + 1; // 1 or 2
-    const newItems = Array.from({ length: newItemsCount }).map((_, i) => ({
-      id: `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      title: `Demanda ${turn}-${i + 1}`,
-      type: Math.random() > 0.85 ? 'urgente' : 'padrao', // 15% chance de urgente
-      columnId: 'col-up-new',
-      effortLeft: { 
-        dev: Math.floor(Math.random() * 16) + 8, 
-        test: Math.floor(Math.random() * 8) + 4, 
-        uat: Math.floor(Math.random() * 8) + 4 
-      },
-      isBlocked: false,
-      activeTime: 0,
-      waitTime: 0,
-      customerValidated: false
-    }));
+    const newItems = Array.from({ length: newItemsCount }).map((_, i) => {
+      const devEffort = Math.floor(Math.random() * 16) + 8;
+      const testEffort = Math.floor(Math.random() * 8) + 4;
+      const uatEffort = Math.floor(Math.random() * 8) + 4;
+      
+      return {
+        id: `card-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: `Demanda ${turn}-${i + 1}`,
+        type: Math.random() > 0.85 ? 'urgente' : 'padrao', // 15% chance de urgente
+        columnId: 'col-up-new',
+        effortTotal: { dev: devEffort, test: testEffort, uat: uatEffort },
+        effortLeft: { dev: devEffort, test: testEffort, uat: uatEffort },
+        isBlocked: false,
+        activeTime: 0,
+        waitTime: 0,
+        createdAt: turn,
+        startedAt: null,
+        completedAt: null,
+        customerValidated: false
+      };
+    });
 
     // Record CFD snapshot before moving to next day
     const snapshot = { turn };
