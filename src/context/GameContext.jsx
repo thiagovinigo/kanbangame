@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { initialColumns, initialCards } from '../utils/initialState';
-import { generateMockMarkdown } from '../utils/mockAiResponses';
+import { generateMockMarkdown, updateStoriesMarkdown, updatePrdMarkdown } from '../utils/mockAiResponses';
 
 const GameContext = createContext();
 
@@ -12,9 +12,10 @@ export const GameProvider = ({ children, isAIMode = false }) => {
   // Inject AI properties if missing
   const initCards = initialCards.map(c => ({
     ...c,
-    artifacts: c.artifacts || { prd: null, spec: null, qa: null, stories: null },
+    artifacts: c.artifacts || { prd: null, spec: null, qa: null, stories: null, releaseNotes: null },
     risks: c.risks || [],
-    aiStatus: c.aiStatus || ''
+    aiStatus: c.aiStatus || '',
+    updaterRun: c.updaterRun || false
   }));
   
   const [cards, setCards] = useState(initCards);
@@ -69,9 +70,10 @@ export const GameProvider = ({ children, isAIMode = false }) => {
         startedAt: null,
         completedAt: null,
         customerValidated: false,
-        artifacts: { prd: null, spec: null, qa: null, stories: null },
+        artifacts: { prd: null, spec: null, qa: null, stories: null, releaseNotes: null },
         risks: [],
-        aiStatus: 'Recém-chegado no backlog.'
+        aiStatus: 'Recém-chegado no backlog.',
+        updaterRun: false
       };
     });
 
@@ -147,6 +149,15 @@ export const GameProvider = ({ children, isAIMode = false }) => {
           if (c.columnId === 'col-down-val-po' && c.effortLeft.uat > 0) {
              updatedCard.effortLeft.uat = Math.max(0, c.effortLeft.uat - 8);
              updatedCard.aiStatus = '🤖 Agente PO validando entrega...';
+          }
+
+          if (c.columnId === 'col-down-done' && !c.updaterRun) {
+             updatedCard.artifacts.releaseNotes = generateMockMarkdown('release_notes', c.title);
+             updatedCard.artifacts.stories = updateStoriesMarkdown(c.artifacts.stories);
+             updatedCard.artifacts.prd = updatePrdMarkdown(c.artifacts.prd);
+             updatedCard.updaterRun = true;
+             updatedCard.aiStatus = '🔄 Agentes SRE e Updater concluíram o deploy e sincronizaram a documentação!';
+             showFeedback('🚀 Deploy & Sync Concluídos', `SRE subiu a demanda "${c.title}" e a documentação foi atualizada com sucesso.`, 'info');
           }
 
           return updatedCard;

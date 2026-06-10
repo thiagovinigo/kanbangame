@@ -43,6 +43,7 @@ export const DocumentModal = ({ isOpen, onClose, title, content, type }) => {
       case 'spec': return '#a855f7';
       case 'qa': return '#10b981';
       case 'stories': return '#f59e0b';
+      case 'releaseNotes': return '#ec4899';
       default: return 'var(--text-primary)';
     }
   };

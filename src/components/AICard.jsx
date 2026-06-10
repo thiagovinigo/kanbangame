@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { cardTypeColors } from '../utils/initialState';
-import { Settings, AlertTriangle, Calendar, Star, FileText, Bot, ShieldAlert } from 'lucide-react';
+import { Settings, AlertTriangle, Calendar, Star, FileText, Bot, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { DocumentModal } from './DocumentModal';
 
 export const AICard = ({ card }) => {
@@ -52,6 +52,12 @@ export const AICard = ({ card }) => {
         {...listeners}
         className="glass-panel hover-scale"
       >
+        {card.updaterRun && (
+          <div style={{ position: 'absolute', top: '-10px', left: '-10px', background: 'var(--accent-emerald)', color: '#fff', borderRadius: '12px', padding: '2px 8px', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)', zIndex: 10, fontWeight: 'bold' }}>
+            <CheckCircle2 size={12} /> UPDATER OK
+          </div>
+        )}
+        
         {card.risks.length > 0 && (
           <div style={{ position: 'absolute', top: '-12px', right: '-12px', background: 'var(--accent-amber)', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)', zIndex: 10 }} title="Risco Identificado!">
             <ShieldAlert size={16} color="white" />
@@ -97,6 +103,11 @@ export const AICard = ({ card }) => {
             {card.artifacts.qa && (
               <button onPointerDown={(e) => { e.stopPropagation(); setActiveDoc('qa'); }} style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '12px', padding: '2px 8px', fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <FileText size={10} /> QA
+              </button>
+            )}
+            {card.artifacts.releaseNotes && (
+              <button onPointerDown={(e) => { e.stopPropagation(); setActiveDoc('releaseNotes'); }} style={{ background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', border: '1px solid rgba(236, 72, 153, 0.3)', borderRadius: '12px', padding: '2px 8px', fontSize: '0.7rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <FileText size={10} /> Release Notes
               </button>
             )}
           </div>

@@ -20,6 +20,9 @@ Resolver a necessidade do usuário de realizar a ação com mais agilidade e seg
 - [ ] Tempo de resposta não deve ultrapassar 2 segundos.
 - [ ] Deve funcionar no aplicativo mobile (iOS e Android).
 
+## ⏳ Status do Desenvolvimento
+**Funcionalidades Aguardando:** Todas as tarefas e histórias listadas acima ainda não foram implementadas no sistema.
+
 ## 📊 Métricas de Sucesso
 - Aumento de 15% na taxa de conversão da funcionalidade.
 - Redução de tickets no suporte relacionados a este fluxo.
@@ -85,15 +88,47 @@ E caso falhe definitivamente, mostrar modal de "Tente Novamente mais tarde" sem 
 
 Esta demanda principal era muito grande e foi quebrada em entregas menores pelo Agente de Produto:
 
-1. **[Backend]** Criar o schema de banco e os endpoints base. (Tamanho: P)
-2. **[Frontend]** Desenvolver o formulário inicial na interface. (Tamanho: M)
-3. **[Frontend]** Implementar validações complexas e tratamento de erro. (Tamanho: P)
-4. **[Integração]** Publicar os eventos no Kafka e criar consumidores básicos. (Tamanho: M)
+- [ ] **[Backend]** Criar o schema de banco e os endpoints base. (Tamanho: P)
+- [ ] **[Frontend]** Desenvolver o formulário inicial na interface. (Tamanho: M)
+- [ ] **[Frontend]** Implementar validações complexas e tratamento de erro. (Tamanho: P)
+- [ ] **[Integração]** Publicar os eventos no Kafka e criar consumidores básicos. (Tamanho: M)
 
 *Nota do Agente:* Todas essas stories podem ser desenvolvidas em paralelo assim que a API Contract (Swagger) for aprovada.
+      `.trim();
+
+    case 'release_notes':
+      return `
+# 🚀 Release Notes: ${title}
+
+## 🎉 Novidades em Produção!
+Esta demanda completou todo o ciclo de engenharia e foi implantada com sucesso no ambiente de produção pelo **Agente SRE**.
+
+## 📦 O que foi entregue
+- Pipeline de CI/CD executado sem erros.
+- A funcionalidade está 100% aderente à Spec Técnica.
+- Todos os testes de aceitação e regressão automatizados (QA) passaram.
+- Monitoramento (Datadog) e Alertas ativos para essa feature.
+
+## 👥 Impacto
+Os usuários agora podem desfrutar desta atualização, melhorando a métrica de conversão esperada no PRD original.
       `.trim();
 
     default:
       return '# Documento não encontrado';
   }
+};
+
+export const updateStoriesMarkdown = (markdown) => {
+  if (!markdown) return markdown;
+  // Transforma as checkbox vazias em marcadas
+  return markdown.replace(/- \[ \]/g, '- [x]');
+};
+
+export const updatePrdMarkdown = (markdown) => {
+  if (!markdown) return markdown;
+  // Atualiza o status
+  return markdown.replace(
+    '**Funcionalidades Aguardando:** Todas as tarefas e histórias listadas acima ainda não foram implementadas no sistema.',
+    '✅ **Funcionalidades Desenvolvidas:** Tudo foi implantado em produção e os artefatos foram sincronizados pelo Agente Updater.'
+  );
 };
