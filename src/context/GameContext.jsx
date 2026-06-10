@@ -1,13 +1,23 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { initialColumns, initialCards } from '../utils/initialState';
+import { generateMockMarkdown } from '../utils/mockAiResponses';
 
 const GameContext = createContext();
 
 export const useGame = () => useContext(GameContext);
 
-export const GameProvider = ({ children }) => {
+export const GameProvider = ({ children, isAIMode = false }) => {
   const [columns, setColumns] = useState(initialColumns);
-  const [cards, setCards] = useState(initialCards);
+  
+  // Inject AI properties if missing
+  const initCards = initialCards.map(c => ({
+    ...c,
+    artifacts: c.artifacts || { prd: null, spec: null, qa: null, stories: null },
+    risks: c.risks || [],
+    aiStatus: c.aiStatus || ''
+  }));
+  
+  const [cards, setCards] = useState(initCards);
   const [turn, setTurn] = useState(1);
   const [teamConfig, setTeamConfig] = useState({ dev: 2, test: 1, uat: 1 });
   const [capacity, setCapacity] = useState({ dev: 16, test: 8, uat: 8 });
@@ -58,7 +68,10 @@ export const GameProvider = ({ children }) => {
         createdAt: turn,
         startedAt: null,
         completedAt: null,
-        customerValidated: false
+        customerValidated: false,
+        artifacts: { prd: null, spec: null, qa: null, stories: null },
+        risks: [],
+        aiStatus: 'Recém-chegado no backlog.'
       };
     });
 
@@ -86,7 +99,61 @@ export const GameProvider = ({ children }) => {
         }
         return c;
       });
-      return [...updatedCards, ...newItems]; // Adiciona as novas demandas ao pool
+      let finalCards = [...updatedCards, ...newItems]; // Adiciona as novas demandas ao pool
+      
+      if (isAIMode) {
+        finalCards = finalCards.map(c => {
+          const updatedCard = { ...c };
+          
+          if (c.columnId === 'col-up-ref-funcional' && !c.artifacts.prd) {
+            updatedCard.artifacts.prd = generateMockMarkdown('prd', c.title);
+            updatedCard.artifacts.stories = generateMockMarkdown('stories', c.title);
+            updatedCard.aiStatus = '✅ PRD e User Stories gerados pelo Agente PM.';
+            showFeedback('✨ Agente de Produto Finalizou', `O Agente PM criou o PRD para a demanda "${c.title}".`, 'info');
+          }
+          
+          if (c.columnId === 'col-up-ref-tecnico' && !c.artifacts.spec) {
+            updatedCard.artifacts.spec = generateMockMarkdown('spec', c.title);
+            updatedCard.aiStatus = '✅ Spec Técnica gerada pelo Agente Arquiteto.';
+            showFeedback('✨ Agente Arquiteto Finalizou', `O Agente Arquiteto criou a Spec Técnica para a demanda "${c.title}".`, 'info');
+          }
+          
+          if (c.columnId === 'col-up-ready' && c.risks.length === 0) {
+            const doneCards = finalCards.filter(card => card.columnId === 'col-down-done');
+            if (doneCards.length > 0 && Math.random() > 0.5) {
+              updatedCard.risks.push(`Alerta de Dependência: Compartilha código com "${doneCards[0].title}". Teste de regressão necessário.`);
+              updatedCard.aiStatus = '⚠️ Riscos identificados na análise arquitetural.';
+            } else {
+              updatedCard.risks.push('Análise concluída: Baixo Risco de impacto.');
+              updatedCard.aiStatus = '✅ Análise de risco concluída sem impedimentos críticos.';
+            }
+          }
+          
+          if ((c.columnId === 'col-down-ready-test' || c.columnId === 'col-down-testing') && !c.artifacts.qa) {
+            updatedCard.artifacts.qa = generateMockMarkdown('qa', c.title);
+            updatedCard.aiStatus = '✅ Plano de Testes (BDD) gerado pelo Agente QA.';
+            showFeedback('✨ Agente QA Finalizou', `O Agente QA criou o Plano de Testes para a demanda "${c.title}".`, 'info');
+          }
+
+          // In AI Mode, effort automatically reduces (simulating agents working in downstream)
+          if (c.columnId === 'col-down-dev' && c.effortLeft.dev > 0) {
+             updatedCard.effortLeft.dev = Math.max(0, c.effortLeft.dev - 8);
+             updatedCard.aiStatus = '🤖 Agente DEV programando...';
+          }
+          if (c.columnId === 'col-down-testing' && c.effortLeft.test > 0) {
+             updatedCard.effortLeft.test = Math.max(0, c.effortLeft.test - 8);
+             updatedCard.aiStatus = '🤖 Agente QA automatizando testes...';
+          }
+          if (c.columnId === 'col-down-val-po' && c.effortLeft.uat > 0) {
+             updatedCard.effortLeft.uat = Math.max(0, c.effortLeft.uat - 8);
+             updatedCard.aiStatus = '🤖 Agente PO validando entrega...';
+          }
+
+          return updatedCard;
+        });
+      }
+
+      return finalCards;
     });
 
     setTurn(prev => prev + 1);
@@ -99,7 +166,7 @@ export const GameProvider = ({ children }) => {
 
   const resetGame = () => {
     setColumns(initialColumns);
-    setCards(initialCards);
+    setCards(initCards);
     setTurn(1);
     setCapacity({
       dev: teamConfig.dev * 8,
@@ -401,36 +468,33 @@ export const GameProvider = ({ children }) => {
     return { approvedCount, rejectedCount };
   };
 
-  const value = {
-    columns,
-    cards,
-    turn,
-    capacity,
-    teamConfig,
-    history,
-    feedback,
-    showFeedback,
-    closeFeedback,
-    nextTurn,
-    moveCard,
-    applyEffort,
-    autoPlayTurn,
-    forceCompleteEffort,
-    cheatAdvanceCardsToDone,
-    resetGame,
-    blockRandomCard,
-    unblockCard,
-    updateTeamConfig,
-    dailyStep,
-    startDaily,
-    nextDailyStep,
-    prevDailyStep,
-    stopDaily,
-    simulateCustomerFeedback
-  };
-
   return (
-    <GameContext.Provider value={value}>
+    <GameContext.Provider value={{
+      columns,
+      cards: cards.map(c => ({ ...c, aiSuggestion: null })),
+      turn,
+      capacity,
+      teamConfig,
+      feedback,
+      history,
+      dailyStep,
+      isAIMode,
+      startDaily,
+      nextDailyStep,
+      prevDailyStep,
+      stopDaily,
+      showFeedback,
+      closeFeedback,
+      moveCard,
+      applyEffort,
+      nextTurn,
+      unblockCard,
+      updateTeamConfig,
+      resetGame,
+      autoPlayTurn,
+      cheatAdvanceCardsToDone,
+      cheatPopulateCards
+    }}>
       {children}
     </GameContext.Provider>
   );

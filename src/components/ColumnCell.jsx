@@ -2,10 +2,11 @@ import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card } from './Card';
+import { AICard } from './AICard';
 import { useGame } from '../context/GameContext';
 
 export const ColumnCell = ({ column, swimlane }) => {
-  const { cards, dailyStep, columns } = useGame();
+  const { cards, dailyStep, columns, isAIMode } = useGame();
   
   // Calculate if we are in Daily Walk the Board mode and if this column is out of focus
   const isDailyMode = dailyStep !== null;
@@ -53,7 +54,7 @@ export const ColumnCell = ({ column, swimlane }) => {
       }}
     >
       {cellCards.map(card => (
-        <Card key={card.id} card={card} />
+        isAIMode ? <AICard key={card.id} card={card} /> : <Card key={card.id} card={card} />
       ))}
     </div>
   );

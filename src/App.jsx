@@ -15,10 +15,12 @@ import { CFDDashboard } from './components/CFDDashboard';
 import { StorytellingDashboard } from './components/StorytellingDashboard';
 import { NarratorOverlay } from './components/NarratorOverlay';
 import { useAutoSimulation } from './hooks/useAutoSimulation';
-import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp, BookOpen, Film } from 'lucide-react';
+import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp, ArrowLeft } from 'lucide-react';
+import { HomePage } from './components/HomePage';
+import { AISimulatorPlaceholder } from './components/AISimulatorPlaceholder';
 import './index.css';
 
-function AppContent() {
+function AppContent({ onBack }) {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [policyColumn, setPolicyColumn] = useState(null);
   const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
@@ -38,7 +40,10 @@ function AppContent() {
   return (
     <div className="app-container">
       <header className="header glass-panel">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button onClick={onBack} className="btn btn-secondary" style={{ padding: '8px', border: 'none', background: 'transparent' }} title="Voltar ao Portal">
+            <ArrowLeft size={24} color="var(--text-secondary)" />
+          </button>
           <div style={{ background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', padding: '8px', borderRadius: '8px' }}>
             <LayoutDashboard size={24} color="white" />
           </div>
@@ -118,9 +123,23 @@ function AppContent() {
 }
 
 function App() {
+  const [currentMode, setCurrentMode] = useState('home');
+
+  if (currentMode === 'home') {
+    return <HomePage onSelectMode={setCurrentMode} />;
+  }
+
+  if (currentMode === 'ai') {
+    return (
+      <GameProvider isAIMode={true}>
+        <AppContent onBack={() => setCurrentMode('home')} />
+      </GameProvider>
+    );
+  }
+
   return (
-    <GameProvider>
-      <AppContent />
+    <GameProvider isAIMode={false}>
+      <AppContent onBack={() => setCurrentMode('home')} />
     </GameProvider>
   );
 }
