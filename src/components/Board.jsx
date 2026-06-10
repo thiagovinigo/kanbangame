@@ -57,8 +57,8 @@ export const Board = ({ onOpenPolicy }) => {
     }
   };
 
-  const upstreamCols = columns.filter(c => c.id.startsWith('col-up-'));
-  const downstreamCols = columns.filter(c => c.id.startsWith('col-down-'));
+  const upstreamCols = columns.filter(c => c.id.startsWith('col-up-') || ['col-ai-backlog', 'col-ai-pm', 'col-ai-arch', 'col-ai-replenishment'].includes(c.id));
+  const downstreamCols = columns.filter(c => c.id.startsWith('col-down-') || ['col-ai-dev', 'col-ai-qa', 'col-ai-done'].includes(c.id));
 
   return (
     <div className="board-container animate-fade-in" ref={boardRef} style={{ display: 'flex', flexDirection: 'column', overflowX: 'auto', paddingBottom: '20px' }}>
