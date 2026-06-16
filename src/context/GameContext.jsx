@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { initialColumns, initialCards, aiColumns } from '../utils/initialState';
 import { generateMockMarkdown, updateStoriesMarkdown, updatePrdMarkdown } from '../utils/mockAiResponses';
+import { supabase } from '../utils/supabaseClient';
 
 const GameContext = createContext();
 
@@ -22,6 +23,7 @@ export const GameProvider = ({ children, isAIMode = false }) => {
   const storageKey = isAIMode ? 'kanbanState_ai' : 'kanbanState_classic';
 
   const loadSavedState = () => {
+    if (isAIMode) return null;
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) return JSON.parse(saved);
@@ -46,15 +48,54 @@ export const GameProvider = ({ children, isAIMode = false }) => {
   const prevDailyStep = () => setDailyStep(prev => (prev !== null && prev < 13) ? prev + 1 : prev);
   const stopDaily = () => setDailyStep(null);
 
-  // Auto-Save Effect
+  // Auto-Save Effect (Only for Classic Mode)
   useEffect(() => {
+    if (isAIMode) return;
     try {
       const stateToSave = { cards, turn, teamConfig, capacity, history };
       localStorage.setItem(storageKey, JSON.stringify(stateToSave));
     } catch (e) {
-      console.error('Falha ao salvar jogo', e);
+      console.error('Falha ao salvar jogo clássico', e);
     }
-  }, [cards, turn, teamConfig, capacity, history, storageKey]);
+  }, [cards, turn, teamConfig, capacity, history, storageKey, isAIMode]);
+
+  // Supabase Realtime (Only for AI Mode)
+  useEffect(() => {
+    if (!isAIMode) return;
+
+    const fetchCards = async () => {
+      const { data, error } = await supabase.from('cards').select('*');
+      if (data && !error && data.length > 0) {
+        const mappedCards = data.map(dbCard => ({
+          id: dbCard.id,
+          feature_id: dbCard.feature_id,
+          columnId: dbCard.column_id,
+          title: dbCard.title,
+          description: dbCard.description,
+          type: dbCard.type,
+          points: dbCard.points,
+          artifacts: dbCard.artifacts || { prd: null, spec: null, qa: null, stories: null, releaseNotes: null },
+          risks: dbCard.risks || [],
+          aiStatus: dbCard.ai_status || '',
+          updaterRun: dbCard.updater_run || false
+        }));
+        setCards(mappedCards);
+      }
+    };
+
+    fetchCards();
+
+    const subscription = supabase
+      .channel('public:cards')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cards' }, () => {
+        fetchCards();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [isAIMode]);
 
   const showFeedback = (title, message, type = 'error') => {
     setTimeout(() => {
@@ -211,92 +252,96 @@ export const GameProvider = ({ children, isAIMode = false }) => {
 
   // Removed rollDice function
 
-  const moveCard = (cardId, toColumnId) => {
-    setCards(prevCards => {
-      const card = prevCards.find(c => c.id === cardId);
-      if (!card || card.columnId === toColumnId) return prevCards;
+  const moveCard = async (cardId, toColumnId) => {
+    const card = cards.find(c => c.id === cardId);
+    if (!card || card.columnId === toColumnId) return;
+    
+    const fromColumnId = card.columnId;
 
-      if (card.isBlocked) {
+    if (card.isBlocked) {
+      showFeedback(
+        '🛑 Cartão Impedido!', 
+        'Você não pode mover um cartão bloqueado. Pela regra do Kanban, ele deve continuar onde está e consumir o Limite de WIP para gerar "dor" no time. Façam um Swarming para resolver o impedimento antes de continuar!', 
+        'error'
+      );
+      return;
+    }
+
+    const targetColumn = columns.find(c => c.id === toColumnId);
+    if (!targetColumn) return;
+
+    // Rule 1: WIP Limit (Expedite ignores this)
+    if (targetColumn.limit > 0 && card.type !== 'urgente') {
+      const cardsInTarget = cards.filter(c => c.columnId === toColumnId).length;
+      if (cardsInTarget >= targetColumn.limit) {
         showFeedback(
-          '🛑 Cartão Impedido!', 
-          'Você não pode mover um cartão bloqueado. Pela regra do Kanban, ele deve continuar onde está e consumir o Limite de WIP para gerar "dor" no time. Façam um Swarming para resolver o impedimento antes de continuar!', 
-          'error'
-        );
-        return prevCards;
-      }
-
-      const targetColumn = columns.find(c => c.id === toColumnId);
-      if (!targetColumn) return prevCards;
-
-      // Rule 1: WIP Limit (Expedite ignores this)
-      if (targetColumn.limit > 0 && card.type !== 'urgente') {
-        const cardsInTarget = prevCards.filter(c => c.columnId === toColumnId).length;
-        if (cardsInTarget >= targetColumn.limit) {
-          showFeedback(
-            '⚠️ Pare de começar e comece a terminar!',
-            `Puxar este cartão violaria a capacidade máxima da coluna "${targetColumn.title}" (WIP Limit: ${targetColumn.limit}).\n\nNo Kanban, limitamos o Trabalho em Progresso para criar um Sistema Puxado. Ajude seus colegas a terminar o que já está na coluna em vez de puxar coisas novas!`,
-            'warning'
-          );
-          return prevCards;
-        }
-      }
-
-      // Rule 2: Effort completion (Definition of Done)
-      const colIndex = columns.findIndex(c => c.id === toColumnId);
-      // Rule 3: Sequential movement (Do not skip columns)
-      const currentIndex = columns.findIndex(c => c.id === card.columnId);
-      if (colIndex > currentIndex + 1) {
-        showFeedback(
-          '❌ Movimento Inválido', 
-          `Você não pode pular colunas no fluxo Kanban! Mova o cartão sequencialmente para a próxima etapa.`, 
+          '⚠️ Pare de começar e comece a terminar!',
+          `Puxar este cartão violaria a capacidade máxima da coluna "${targetColumn.title}" (WIP Limit: ${targetColumn.limit}).\n\nNo Kanban, limitamos o Trabalho em Progresso para criar um Sistema Puxado. Ajude seus colegas a terminar o que já está na coluna em vez de puxar coisas novas!`,
           'warning'
         );
-        return prevCards;
+        return;
       }
-      
-      // Validation thresholds based on current mode
-      const devDoneIndex = isAIMode ? 5 : 7; // QA or Dev-Done
-      const testDoneIndex = isAIMode ? 6 : 10; // Done or Ready-Homologacao
-      const uatDoneIndex = isAIMode ? 6 : 12; // Done or Homologado
+    }
 
-      // DEV effort required
-      if (colIndex >= devDoneIndex && card.effortLeft.dev > 0) {
-        showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!', 'error');
-        return prevCards;
-      }
+    // Rule 2: Effort completion (Definition of Done)
+    const colIndex = columns.findIndex(c => c.id === toColumnId);
+    // Rule 3: Sequential movement (Do not skip columns)
+    const currentIndex = columns.findIndex(c => c.id === card.columnId);
+    if (colIndex > currentIndex + 1) {
+      showFeedback(
+        '❌ Movimento Inválido', 
+        `Você não pode pular colunas no fluxo Kanban! Mova o cartão sequencialmente para a próxima etapa.`, 
+        'warning'
+      );
+      return;
+    }
+    
+    // Validation thresholds based on current mode
+    const devDoneIndex = isAIMode ? 5 : 7; // QA or Dev-Done
+    const testDoneIndex = isAIMode ? 6 : 10; // Done or Ready-Homologacao
+    const uatDoneIndex = isAIMode ? 6 : 12; // Done or Homologado
 
-      // TEST effort required
-      if (colIndex >= testDoneIndex && card.effortLeft.test > 0) {
-        showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!', 'error');
-        return prevCards;
-      }
+    // DEV effort required
+    if (!isAIMode && colIndex >= devDoneIndex && card.effortLeft?.dev > 0) {
+      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Desenvolvimento (DEV) antes de avançar o cartão!', 'error');
+      return;
+    }
 
-      // UAT effort required
-      if (colIndex >= uatDoneIndex && card.effortLeft.uat > 0) {
-        showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão!', 'error');
-        return prevCards;
-      }
+    // TEST effort required
+    if (!isAIMode && colIndex >= testDoneIndex && card.effortLeft?.test > 0) {
+      showFeedback('❌ Definition of Done (DoD)', 'Termine o esforço de Qualidade (QA/TEST) antes de avançar o cartão!', 'error');
+      return;
+    }
 
-      return prevCards.map(c => {
-        if (c.id === cardId) {
-          let updates = { columnId: toColumnId };
-          
-          // Track Start and Complete time for Lead Time metrics
-          const startTrackingIndex = isAIMode ? 4 : 5; // Dev vs Ready-Dev
-          const doneColId = isAIMode ? 'col-ai-done' : 'col-down-done';
-          
-          if (!c.startedAt && colIndex >= startTrackingIndex) {
-            updates.startedAt = turn;
-          }
-          if (toColumnId === doneColId && !c.completedAt) {
-            updates.completedAt = turn;
-          }
-          
-          return { ...c, ...updates };
-        }
-        return c;
-      });
-    });
+    // UAT effort required
+    if (!isAIMode && colIndex >= uatDoneIndex && card.effortLeft?.uat > 0) {
+      showFeedback('❌ Definition of Done (DoD)', 'Termine a validação com o Cliente (UAT) antes de avançar o cartão!', 'error');
+      return;
+    }
+
+    let updates = { columnId: toColumnId };
+    const startTrackingIndex = isAIMode ? 4 : 5; // Dev vs Ready-Dev
+    const doneColId = isAIMode ? 'col-ai-done' : 'col-down-done';
+    
+    if (!card.startedAt && colIndex >= startTrackingIndex) {
+      updates.startedAt = turn;
+    }
+    if (toColumnId === doneColId && !card.completedAt) {
+      updates.completedAt = turn;
+    }
+    
+    // Optimistic UI update
+    setCards(prevCards => prevCards.map(c => c.id === cardId ? { ...c, ...updates } : c));
+
+    // Supabase update for AI mode
+    if (isAIMode && !cardId.startsWith('card-')) {
+       await supabase.from('cards').update({ column_id: toColumnId }).eq('id', cardId);
+    }
+
+    // CFD metric track for classic mode
+    if (!isAIMode && toColumnId !== fromColumnId && toColumnId !== 'col-up-new') {
+      setHistory(prev => [...prev, { turn, cardId, from: fromColumnId, to: toColumnId }]);
+    }
   };
 
   const applyEffort = (cardId, effortType, amount = 1) => {

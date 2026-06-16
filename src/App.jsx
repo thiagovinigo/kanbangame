@@ -18,10 +18,13 @@ import { useAutoSimulation } from './hooks/useAutoSimulation';
 import { LayoutDashboard, GraduationCap, UserPlus, Activity, BarChart3, Presentation, PlayCircle, TrendingUp, ArrowLeft } from 'lucide-react';
 import { HomePage } from './components/HomePage';
 import { AISimulatorPlaceholder } from './components/AISimulatorPlaceholder';
+import { NewFeatureModal } from './components/NewFeatureModal';
+import { Sparkles } from 'lucide-react';
 import './index.css';
 
-function AppContent({ onBack }) {
+function AppContent({ isAIMode, onBack }) {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const [isNewFeatureOpen, setIsNewFeatureOpen] = useState(false);
   const [policyColumn, setPolicyColumn] = useState(null);
   const [isReplenishmentOpen, setIsReplenishmentOpen] = useState(false);
   const [isDailyOpen, setIsDailyOpen] = useState(false);
@@ -53,16 +56,30 @@ function AppContent({ onBack }) {
           </div>
         </div>
         <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
-          <button 
-            className="btn btn-primary" 
-            onClick={simulation.startSimulation} 
-            disabled={simulation.isActive}
-            title="Iniciar Tutorial/Simulação Guiada" 
-            style={{ background: 'var(--accent-purple)', borderColor: 'var(--accent-purple)', color: 'white' }}
-          >
-            <PlayCircle size={18} />
-            Auto-Simulação
-          </button>
+          {isAIMode && (
+            <button 
+              className="btn btn-primary" 
+              onClick={() => setIsNewFeatureOpen(true)} 
+              title="Criar nova feature com ajuda da IA" 
+              style={{ background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-blue))', borderColor: 'transparent', color: 'white' }}
+            >
+              <Sparkles size={18} />
+              Nova Feature IA
+            </button>
+          )}
+
+          {!isAIMode && (
+            <button 
+              className="btn btn-primary" 
+              onClick={simulation.startSimulation} 
+              disabled={simulation.isActive}
+              title="Iniciar Tutorial/Simulação Guiada" 
+              style={{ background: 'var(--accent-purple)', borderColor: 'var(--accent-purple)', color: 'white' }}
+            >
+              <PlayCircle size={18} />
+              Auto-Simulação
+            </button>
+          )}
           
           <button className="btn btn-secondary" onClick={() => setIsCFDDashboardOpen(true)} title="Abrir Análise do Cumulative Flow Diagram" style={{ borderColor: 'var(--accent-emerald)', color: 'var(--accent-emerald)', fontWeight: 'bold' }}>
             <TrendingUp size={18} />
@@ -98,15 +115,25 @@ function AppContent({ onBack }) {
         <MetricsPanel />
       </main>
       <KanbanGuide isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} onOpenStorytelling={() => { setIsRulesOpen(false); setIsStorytellingOpen(true); }} />
+      {policyColumn && <PolicyModal column={policyColumn} onClose={() => setPolicyColumn(null)} />}
+      <FeedbackModal />
       <ReplenishmentModal isOpen={isReplenishmentOpen} onClose={() => setIsReplenishmentOpen(false)} />
       <DailyModal isOpen={isDailyOpen} onClose={() => setIsDailyOpen(false)} />
-      <RetrospectiveDashboard isOpen={isRetroOpen} onClose={() => setIsRetroOpen(false)} />
-      <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
+      {isRetroOpen && <RetrospectiveDashboard onClose={() => setIsRetroOpen(false)} />}
+      {isDemoOpen && <DemoModal onClose={() => setIsDemoOpen(false)} />}
+      {isCFDDashboardOpen && <CFDDashboard onClose={() => setIsCFDDashboardOpen(false)} />}
+      {isStorytellingOpen && <StorytellingDashboard onClose={() => setIsStorytellingOpen(false)} />}
       <DailyGuidePanel />
-      <PolicyModal isOpen={!!policyColumn} onClose={() => setPolicyColumn(null)} column={policyColumn} />
-      <CFDDashboard isOpen={isCFDDashboardOpen} onClose={() => setIsCFDDashboardOpen(false)} />
-      <StorytellingDashboard isOpen={isStorytellingOpen} onClose={() => setIsStorytellingOpen(false)} />
-      <FeedbackModal />
+      
+      {isNewFeatureOpen && (
+        <NewFeatureModal 
+          onClose={() => setIsNewFeatureOpen(false)} 
+          onFeatureCreated={(feature, cards) => {
+            console.log('Feature criadas com os cartões:', cards);
+          }} 
+        />
+      )}
+
       {simulation.isActive && (
         <NarratorOverlay 
           message={simulation.message}
@@ -129,17 +156,11 @@ function App() {
     return <HomePage onSelectMode={setCurrentMode} />;
   }
 
-  if (currentMode === 'ai') {
-    return (
-      <GameProvider key="ai" isAIMode={true}>
-        <AppContent onBack={() => setCurrentMode('home')} />
-      </GameProvider>
-    );
-  }
+  const isAIMode = currentMode === 'ai';
 
   return (
-    <GameProvider key="classic" isAIMode={false}>
-      <AppContent onBack={() => setCurrentMode('home')} />
+    <GameProvider key={currentMode} isAIMode={isAIMode}>
+      <AppContent isAIMode={isAIMode} onBack={() => setCurrentMode('home')} />
     </GameProvider>
   );
 }
